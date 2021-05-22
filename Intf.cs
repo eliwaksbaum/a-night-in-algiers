@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using CommandData;
-using CommandData.Commands;
 
 namespace Intf
 {
@@ -13,104 +11,62 @@ namespace Intf
     public class World
     {
         public bool done = false;
+        public string start;
         public Player player = new Player();
         public string inputChar = ">";
 
         Dictionary<string, Room> rooms = new Dictionary<string, Room>();
-        public Dictionary<string, Func<string>> responses;
-        public Dictionary<string, Func<string, string>> responsesT;
-        public Dictionary<string, Func<string, string, string>> responsesD;
+
+        List<Command> commands;
+        public List<Command> Commands {get{return commands;}} 
+
+        Dictionary<string, Func<string>> responses;
+        public Dictionary<string, Func<string>> Responses {get{return responses;}}
+        Dictionary<string, Func<string, string>> responsesT;
+        public Dictionary<string, Func<string, string>> ResponsesT {get{return responsesT;}}
+        Dictionary<string, Func<string, string, string>> responsesD;
+        public Dictionary<string, Func<string, string, string>> ResponsesD {get{return responsesD;}}
+
+        public Command AddCommand(string id, CommandType type, string[] preps = null, string[] dipreps = null)
+        {
+            Command cmd = new Command(id, type, preps, dipreps);
+            if (commands == null)
+            {
+                commands = new List<Command>();
+            }
+            commands.Add(cmd);
+            return cmd;
+        }
+        public void SetIntransitiveCommand(string id, Func<string> response)
+        {
+            if (responses == null)
+            {
+                responses = new Dictionary<string, Func<string>>();
+            }
+            responses.Add(id, response);
+        }
+        public void SetTransitiveCommand(string id, Func<string, string> responseT)
+        {
+            if (responsesT == null)
+            {
+                responsesT = new Dictionary<string, Func<string, string>>();
+            }
+            responsesT.Add(id, responseT);
+        }
+        public void SetDitransitiveCommand(string id, Func<string, string, string> responseD)
+        {
+            if (responsesD == null)
+            {
+                responsesD = new Dictionary<string, Func<string, string, string>>();
+            }
+            responsesD.Add(id, responseD);
+        }
 
         public Room AddRoom(string roomID)
         {
             Room newRoom = new Room(roomID);
             rooms.Add(roomID, newRoom);
             return newRoom;
-        }
-
-        public void Done()
-        {
-            responses = new Dictionary<string, Func<string>>()
-            {
-                {"look", Browse},
-                {"help", Help},
-                {"inv", Inv},
-                {"quit", Quit}
-            };
-            responsesT = new Dictionary<string, Func<string, string>>()
-            {
-                {"examine", What},
-                {"take", Take},
-                {"talk", Talk},
-                {"go", Go},
-                {"use", UseT}
-            };
-            responsesD = new Dictionary<string, Func<string, string, string>>()
-            {
-                {"give", Give},
-                {"use", UseD}
-            };
-        }
-
-        public string Start()
-        {
-            return "this is the start";
-        }
-
-        public string Browse()
-        {
-            return "look at all this stuff";
-        }
-
-        public string Help()
-        {
-            return "heh good luck";
-        }
-
-        public string Inv()
-        {  
-            return "this is your inventory";
-        }
-
-        public string Quit()
-        {
-            done = true;
-            return "way to be existential. bye";
-        }
-
-        public string What(string objID)
-        {
-            return "lemme see";
-        }
-
-        public string Take(string objID)
-        {
-            return "take";
-        }
-
-        public string Talk(string objID)
-        {
-            return "yatta yata";
-        }
-
-        public string Go(string objID)
-        {
-            return "away we go";
-        }
-
-        public string UseT(string objID)
-        {
-            return "use t";
-        }
-
-        public string UseD(string obj1Id, string obj2ID)
-        {
-            return "use d";
-        }
-
-        public string Give(string obj1ID, string obj2ID)
-        {
-            return "here u go";
         }
     }
 
@@ -133,7 +89,7 @@ namespace Intf
             }
 
             bool inRoom;
-            inRoom = current_room.GameObjects.ContainsKey(target);
+            inRoom = current_room.Items.ContainsKey(target) || current_room.People.ContainsKey(target);
 
             return inInv || inRoom;
         }
@@ -148,7 +104,18 @@ namespace Intf
                 }
             }
 
-            return current_room.GameObjects[target];
+            if (current_room.Items.ContainsKey(target))
+            {
+               return current_room.Items[target];
+            }
+            else if (current_room.People.ContainsKey(target))
+            {
+               return current_room.People[target];
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -164,27 +131,29 @@ namespace Intf
         public string ID {get{return id;}}
         public string description;
         public Dictionary<string, string> exits;
-        Dictionary<string, GameObject> gameObjects;
-        public Dictionary<string, GameObject> GameObjects {get{return gameObjects;}}
+        Dictionary<string, Item> items;
+        public Dictionary<string, Item> Items {get{return items;}}
+        Dictionary<string, Person> people;
+        public Dictionary<string, Person> People {get{return people;}}
 
         public Item AddItem(string itemID)
         {
             Item newItem = new Item(itemID);
-            if (gameObjects == null)
+            if (items == null)
             {
-                gameObjects = new Dictionary<string, GameObject>();
+                items = new Dictionary<string, Item>();
             }
-            gameObjects.Add(itemID, newItem);
+            items.Add(itemID, newItem);
             return newItem;
         }
         public Person AddPerson(string personID)
         {
             Person newPerson = new Person(personID);
-            if (gameObjects == null)
+            if (people == null)
             {
-                gameObjects = new Dictionary<string, GameObject>();
+                people = new Dictionary<string, Person>();
             }
-            gameObjects.Add(personID, newPerson);
+            people.Add(personID, newPerson);
             return newPerson;
         }
     }
@@ -204,10 +173,22 @@ namespace Intf
         protected Dictionary<string, Func<string, string>> responsesD;
         public Dictionary<string, Func<string, string>> ResponsesD {get{return responsesD;}}
 
-        public Func<string> OnLook;
-        public Func<string> OnWhat;
-
-        public virtual void Done(){}
+        public void SetTransitiveCommand(string id, Func<string> responseT)
+        {
+            if (responsesT == null)
+            {
+                responsesT = new Dictionary<string, Func<string>>();
+            }
+            responsesT.Add(id, responseT);
+        }
+        public void SetDitransitiveCommand(string id, Func<string, string> responseD)
+        {
+            if (responsesD == null)
+            {
+                responsesD = new Dictionary<string, Func<string, string>>();
+            }
+            responsesD.Add(id, responseD);
+        }
     }
 
     public class Item : GameObject
@@ -218,46 +199,6 @@ namespace Intf
         public bool targetable = false;
         public List<string> acceptedTools;
         public bool visible = true;
-
-        public Func<string> OnTake;
-        public Func<string> OnUseT;
-        public Func<string, string> OnUseDSuccess;
-        public Func<string, string> OnUseDFail;
-
-        public string Take()
-        {
-            if (takeable)
-            {
-                //Move item to inventory
-            }
-            return OnTake();
-        }
-
-        public string UseD(string tool)
-        {
-            if (acceptedTools.Contains(tool))
-            {
-                return OnUseDSuccess(tool);
-            }
-            else
-            {
-                return OnUseDFail(tool);
-            }
-        }
-
-        public override void Done()
-        {
-            responsesT = new Dictionary<string, Func<string>> ()
-            {
-                {"what", OnWhat},
-                {"take", Take},
-                {"use", OnUseT}
-            };
-            responsesD = new Dictionary<string, Func<string, string>> ()
-            {
-                {"use", UseD}
-            };
-        }
     }
     public class Container : Item
     {
@@ -288,53 +229,81 @@ namespace Intf
         public Person(string _id) : base(_id) {}
 
         public List<string> acceptedGifts;
-
-        public Func<string> OnTalk;
-        public Func<string, string> OnAcceptGift;
-        public Func<string, string> OnDeclineGift;
-
-        public string Give(string gift)
-        {
-            if (acceptedGifts.Contains(gift))
-            {
-                return OnAcceptGift(gift);
-            }
-            else
-            {
-                return OnDeclineGift(gift);
-            }
-        }
-
-        public override void Done()
-        {
-            responsesT = new Dictionary<string, Func<string>> ()
-            {
-                {"what", OnWhat},
-                {"talk", OnTalk}
-            };
-            responsesD = new Dictionary<string, Func<string, string>> ()
-            {
-                {"give", Give}
-            };
-        }
     }
 
     ////////
     //PARSER
     ////////
 
+    public enum CommandType {Intransitive, Transitive, Ditransitive, Multi}
+    public class Command
+    {
+        public Command(string _id, CommandType _type, string[] _preps = null, string[] _dipreps = null)
+        {
+            id = _id;
+            type = _type;
+            preps = _preps;
+            dipreps = _dipreps;
+        }
+        
+        CommandType type;
+        public CommandType Type {get{return type;}}
+        string id;
+        public string ID {get{return id;}}
+        string[] preps;
+        public string[] Preps {get{return preps;}}
+        string[] dipreps;
+        public string[] Dipreps {get{return dipreps;}}
+
+        public string [] aliases;
+        public string MissingTargetError;
+        public string[] MissingTarget2Error;
+        public string[] InaccessibleTargetError;
+        public string[] InaccessibleTarget2Error;
+        public string[] NullHandlerError;
+    }
+    public struct IntransitiveCmd
+    {
+        public IntransitiveCmd(Command _command, Func<string> _response)
+        {
+            command = _command;
+            response = _response;
+        }
+        public Command command;
+        public Func<string> response;
+    }
+    public struct TransitiveCmd
+    {
+        public TransitiveCmd(Command _command, Func<string, string> _response)
+        {
+            command = _command;
+            response = _response;
+        }
+        public Command command;
+        public Func<string, string> response;
+    }
+    public struct DitransitiveCmd
+    {
+        public DitransitiveCmd(Command _command, Func<string, string, string> _response)
+        {
+            command = _command;
+            response = _response;
+        }
+        public Command command;
+        public Func<string, string, string> response;
+    }
+
     public class Parser
     {
         
-
         static public string Parse(string input, World world)
         {
             input = input.ToLower();
             string[] words = (input.Contains(" "))?
                 input.Split(" ", StringSplitOptions.RemoveEmptyEntries) : new string[]{input};
 
-            Command cmd = FindCmd(words[0]);
-            if (cmd.ID == "")
+            Command cmd = FindCmd(words[0], world.Commands, input);
+            if (cmd == null)
             {
                 return words[0] + " is not a valid command.";
             }           
@@ -343,23 +312,37 @@ namespace Intf
             return HandleType(cmd, remainder, world);
         }
 
-        static Command FindCmd(string word0)
+        static Command FindCmd(string word0, List<Command> commands, string input)
         {
-            foreach (Command cmd in CommandData.Data.commands)
+            int matchCount = 0;
+            Command match = null;
+
+            foreach (Command cmd in commands)
             {
                 if (cmd.ID == word0)
                 {
-                    return cmd;
+                    matchCount ++;
+                    match = cmd;
                 }
-                else if (CommandData.Data.aliases.ContainsKey(word0))
+                
+                if (cmd.aliases != null)
                 {
-                    if (cmd.ID == CommandData.Data.aliases[word0])
+                    foreach (string nickname in cmd.aliases)
                     {
-                        return cmd;
+                        if (nickname == word0)
+                        {
+                            matchCount ++;
+                            match = cmd;
+                        }
                     }
                 }
             }
-            return new Command();
+            
+            if (matchCount > 1)
+            {
+                return FindType(input, commands);
+            }
+            return match;
         }
 
         static List<string> GetRemainderList(Command cmd, string[] words)
@@ -385,13 +368,13 @@ namespace Intf
             return remainder;
         }
 
-        static Command FindType(Command cmd, List<string> remainder)
+        static Command FindType(string input, List<Command> commands)
         {
             //determine what type it is
             //Command oneType = new Command(cmd.ID, type, cmd.Preps);
             //return oneType;
 
-            return new Command();
+            return null;
         }
 
         static string HandleType(Command cmd, List<string> remainder, World world)
@@ -399,44 +382,42 @@ namespace Intf
             switch (cmd.Type)
             {
                 case CommandType.Intransitive:
-                    return HandleIntransitive(cmd.ID, remainder, world);
+                    return HandleIntransitive(cmd, remainder, world);
                 case CommandType.Transitive:
-                    return HandleTransitive(cmd.ID, remainder, world);
+                    return HandleTransitive(cmd, remainder, world);
                 case CommandType.Ditransitive:
                     return HandleDitransitive(cmd, remainder, world);
-                case CommandType.Multi:
-                    return HandleType(FindType(cmd, remainder), remainder, world);
                 default:
                     return "bad type";
             }
         }
 
-        static string HandleIntransitive(string cmd, List<string> remainder, World world)
+        static string HandleIntransitive(Command cmd, List<string> remainder, World world)
         {
             if (remainder.Count > 0)
             {
-                return cmd + " is an intransitive command, and can't accept an object.";
+                return cmd.ID + " shouldn't have any words after it.";
             }
             else
             {
-                return world.responses[cmd]();
+                return world.Responses[cmd.ID]();
             }
         }
 
-        static string HandleTransitive(string cmd, List<string> remainder, World world)
+        static string HandleTransitive(Command cmd, List<string> remainder, World world)
         {
             if (remainder.Count > 1)
             {
-                return "Only one word should come after " + cmd + ".";
+                return "Only one word should come after " + cmd.ID + ".";
             }
             else if (remainder.Count < 1)
             {
-                return CommandData.Data.MissingTargetErrors[cmd];
+                return cmd.MissingTargetError;
             }
             else
             {
                 string objID = remainder[0];
-                return world.responsesT[cmd](objID);
+                return world.ResponsesT[cmd.ID](objID);
             }
         }
 
@@ -445,7 +426,7 @@ namespace Intf
             //Make sure we have an object1
             if (remainder.Count < 1)
             {
-                return CommandData.Data.MissingTargetErrors[cmd.ID];
+                return cmd.MissingTargetError;
             }
             else
             {
@@ -455,7 +436,7 @@ namespace Intf
 
                 if (remainder.Count == 0)
                 {
-                    string[] responses = CommandData.Data.MissingTarget2Errors[cmd.ID];
+                    string[] responses = cmd.MissingTarget2Error;
                     return responses[0] + obj1ID + responses[1];
                 }
 
@@ -471,7 +452,6 @@ namespace Intf
                 }
                 if (!goodDiprep)
                 {
-                    Console.WriteLine(cmd.Dipreps);
                     return cmd.ID + " .. " + remainder[0] + " is not a valid command. Try " + cmd.ID + " .. " + cmd.Dipreps[0] + " instead.";
                 }
                 else
@@ -480,13 +460,13 @@ namespace Intf
                     //Make sure we have an object2
                     if (remainder.Count < 1)
                     {
-                        string[] responses = CommandData.Data.MissingTarget2Errors[cmd.ID];
+                        string[] responses = cmd.MissingTarget2Error;
                         return responses[0] + obj1ID + responses[1];
                     }
                     else
                     {
                         string obj2ID = remainder[0];
-                        return world.responsesD[cmd.ID](obj1ID, obj2ID);
+                        return world.ResponsesD[cmd.ID](obj1ID, obj2ID);
                     }
                     
                 }

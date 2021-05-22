@@ -216,7 +216,6 @@ namespace Intf
 
         public string [] aliases;
         public string MissingTargetError;
-        public string[] MissingTarget2Error;
     }
     public struct IntransitiveCmd
     {
@@ -258,7 +257,7 @@ namespace Intf
             string[] words = (input.Contains(" "))?
                 input.Split(" ", StringSplitOptions.RemoveEmptyEntries) : new string[]{input};
 
-            Command cmd = FindCmd(words[0], world.Commands, input);
+            Command cmd = FindCmd(words[0], world.Commands);
             if (cmd == null)
             {
                 return words[0] + " is not a valid command.";
@@ -268,17 +267,13 @@ namespace Intf
             return HandleType(cmd, remainder, world);
         }
 
-        static Command FindCmd(string word0, List<Command> commands, string input)
+        static Command FindCmd(string word0, List<Command> commands)
         {
-            int matchCount = 0;
-            Command match = null;
-
             foreach (Command cmd in commands)
             {
                 if (cmd.ID == word0)
                 {
-                    matchCount ++;
-                    match = cmd;
+                    return cmd;
                 }
                 
                 if (cmd.aliases != null)
@@ -287,18 +282,12 @@ namespace Intf
                     {
                         if (nickname == word0)
                         {
-                            matchCount ++;
-                            match = cmd;
+                            return cmd;
                         }
                     }
                 }
             }
-            
-            if (matchCount > 1)
-            {
-                return FindType(input, commands);
-            }
-            return match;
+            return null;
         }
 
         static List<string> GetRemainderList(Command cmd, string[] words)
@@ -322,15 +311,6 @@ namespace Intf
                 }
             }
             return remainder;
-        }
-
-        static Command FindType(string input, List<Command> commands)
-        {
-            //determine what type it is
-            //Command oneType = new Command(cmd.ID, type, cmd.Preps);
-            //return oneType;
-
-            return null;
         }
 
         static string HandleType(Command cmd, List<string> remainder, World world)
@@ -392,8 +372,7 @@ namespace Intf
 
                 if (remainder.Count == 0)
                 {
-                    string[] responses = cmd.MissingTarget2Error;
-                    return responses[0] + obj1ID + responses[1];
+                    return world.ResponsesD[cmd.ID](obj1ID, "");
                 }
 
                 //Deal with diprep
@@ -413,18 +392,8 @@ namespace Intf
                 else
                 {
                     remainder.RemoveAt(0);
-                    //Make sure we have an object2
-                    if (remainder.Count < 1)
-                    {
-                        string[] responses = cmd.MissingTarget2Error;
-                        return responses[0] + obj1ID + responses[1];
-                    }
-                    else
-                    {
-                        string obj2ID = remainder[0];
-                        return world.ResponsesD[cmd.ID](obj1ID, obj2ID);
-                    }
-                    
+                    string obj2ID = (remainder.Count < 1)? "" : remainder[0];
+                    return world.ResponsesD[cmd.ID](obj1ID, obj2ID);
                 }
             }
         }

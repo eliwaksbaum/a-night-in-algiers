@@ -169,36 +169,21 @@ namespace Algiers
                 return "zoom zoom";
             });
 
-            Command useT = world.AddCommand("use", CommandType.Transitive);
-            useT.MissingTargetError = "Use what?";
-            world.SetTransitiveCommand("use", (obj) => {
-                if (!player.InInventory(obj))
-                {
-                    string indef = (Parser.StartsWithVowel(obj))? "an " : "a ";
-                    return "You don't have " + indef + obj + " in you inventory";
-                }
-                else
-                {
-                    GameObject obObj = player.GetObject(obj);
-                    if (!obObj.ResponsesT.ContainsKey("use"))
-                    {
-                        return "You can't use the " + obj + ".";
-                    }
-                    else
-                    {
-                        return obObj.ResponsesT["use"]();
-                    }
-                }
-            });
-
-            Command useD = world.AddCommand("use", CommandType.Ditransitive, dipreps: new string[]{"on", "with"});
-            useD.MissingTargetError = "Use what?";
-            useD.MissingTarget2Error = new string[] {"Use ", " on what?"};
+            Command use = world.AddCommand("use", CommandType.Ditransitive, dipreps: new string[]{"on", "with"});
+            use.MissingTargetError = "Use what?";
             world.SetDitransitiveCommand("use", (tool, target) => {
                 if (!player.InInventory(tool))
                 {
                     string indef = (Parser.StartsWithVowel(tool))? "an " : "a ";
                     return "You don't have " + indef + tool + " in you inventory.";
+                }
+                else if (player.GetObject(tool).ResponsesT.ContainsKey("use"))
+                {
+                    return player.GetObject(tool).ResponsesT["use"]();
+                }
+                else if (target == "")
+                {
+                    return "Use " + tool + " on what?";
                 }
                 else if (!player.CanAccessObject(target))
                 {
@@ -207,7 +192,7 @@ namespace Algiers
                 else
                 {
                     GameObject targetObj = player.GetObject(target);;
-                    string nullHandler = "You can't use the " + tool + "with the " + target + ".";
+                    string nullHandler = "You can't use the " + tool + " with the " + target + ".";
                     if (!targetObj.ResponsesD.ContainsKey("use"))
                     {
                         return nullHandler;
@@ -222,12 +207,15 @@ namespace Algiers
 
             Command give = world.AddCommand("give", CommandType.Ditransitive, dipreps: new string[]{"to"});
             give.MissingTargetError = "Give what?";
-            give.MissingTarget2Error = new string[] {"Give ", " to whom?"};
             world.SetDitransitiveCommand("give", (gift, person) => {
                 if (!player.InInventory(gift))
                 {
                     string indef = (Parser.StartsWithVowel(gift))? "an " : "a ";
                     return "You don't have " + indef + gift + " in you inventory.";
+                }
+                else if (person == "")
+                {
+                    return "Give " + gift + " to whom?";
                 }
                 else if (!player.CanAccessObject(person))
                 {
@@ -236,7 +224,7 @@ namespace Algiers
                 else
                 {
                     GameObject personObj = player.GetObject(person);
-                    string nullHandler = "You can't give the " + gift + "to the " + person + ".";
+                    string nullHandler = "You can't give the " + gift + " to the " + person + ".";
                     if (!personObj.ResponsesD.ContainsKey("give"))
                     {
                         return nullHandler;
@@ -284,11 +272,10 @@ namespace Algiers
             chair.SetTransitiveCommand("take", () => {
                 return "The chair is too heavy to pick up.";
             });
-            chair.SetDitransitiveCommand("give", (gift) => {
-                if (gift == "marker")
+            chair.SetDitransitiveCommand("use", (tool) => {
+                if (tool == "marker")
                 {
                     chair.conditions["marked"] = true;
-                    player.RemoveFromInventory("marker");
                     return "You scrawl all over the chair with the marker.";
                 }
                 else {return null;}
@@ -318,6 +305,9 @@ namespace Algiers
             coin.SetTransitiveCommand("take", () => {
                 player.AddToInventory("coin");
                 return "You slip the penny into your pocket.";
+            });
+            coin.SetTransitiveCommand("use", () => {
+                return "You flip the coin in the air.";
             });
 
             player.current_room = chambre;

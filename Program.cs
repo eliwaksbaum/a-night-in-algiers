@@ -115,7 +115,7 @@ namespace Algiers
                 }
                 else
                 {
-                    Item obObj = (Item) player.GetObject(obj);
+                    GameObject obObj = player.GetObject(obj);
                     if (!obObj.ResponsesT.ContainsKey("take"))
                     {
                         return "You can't take the " + obj + ".";
@@ -165,7 +165,7 @@ namespace Algiers
                 }
                 else
                 {
-                    Item obObj = (Item) player.GetObject(obj);
+                    GameObject obObj = player.GetObject(obj);
                     if (!obObj.ResponsesT.ContainsKey("use"))
                     {
                         return "You can't use the " + obj + ".";
@@ -245,7 +245,7 @@ namespace Algiers
             };
 
             //CHAIR
-            Item chair = chambre.AddObject<Item>("chair");
+            GameObject chair = chambre.AddObject<GameObject>("chair");
             chair.conditions.Add("marked", false);
             chair.SetTransitiveCommand("look", () => {
                 if (!chair.conditions["marked"])
@@ -281,7 +281,7 @@ namespace Algiers
             });
 
             //MARKER
-            Item marker = chambre.AddObject<Item>("marker");
+            GameObject marker = chambre.AddObject<GameObject>("marker");
             marker.SetTransitiveCommand("look", () => {
                 return "A marker lies discarded on the floor.";
             });

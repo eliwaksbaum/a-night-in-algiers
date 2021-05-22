@@ -62,19 +62,12 @@ namespace Intf
     public class Player
     {
         public Room current_room;
-        List<Item> inventory = new List<Item>();
-        public List<Item> Inventory {get{return inventory;}}
+        Dictionary<string, GameObject> inventory = new Dictionary<string, GameObject>();
+        public Dictionary<string, GameObject> Inventory {get{return inventory;}}
 
         public bool InInventory(string target)
         {
-            foreach (Item item in inventory)
-            {
-                if (item.ID == target)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return inventory.ContainsKey(target);
         }
 
         public bool InRoom(string target)
@@ -89,12 +82,9 @@ namespace Intf
 
         public GameObject GetObject(string target)
         {
-            foreach (Item item in inventory)
+            if (inventory.ContainsKey(target))
             {
-                if (item.ID == target)
-                {
-                    return item;
-                }
+                return inventory[target];
             }
 
             if (current_room.GameObjects.ContainsKey(target))
@@ -109,21 +99,13 @@ namespace Intf
         {
             if (current_room.GameObjects.ContainsKey(target))
             {
-                inventory.Add((Item) current_room.GameObjects[target]);
+                inventory.Add(target, current_room.GameObjects[target]);
                 current_room.GameObjects.Remove(target);
             }
         }
         public void RemoveFromInventory(string target)
         {
-            Item toRemove = null;
-            foreach (Item item in inventory)
-            {
-                if (item.ID == target)
-                {
-                    toRemove = item;
-                }
-            }
-            inventory.Remove(toRemove);
+            inventory.Remove(target);
         }
     }
 
@@ -139,10 +121,6 @@ namespace Intf
         public string ID {get{return id;}}
         public string description;
         public Dictionary<string, string> exits;
-        // Dictionary<string, Item> items;
-        // public Dictionary<string, Item> Items {get{return items;}}
-        // Dictionary<string, Person> people;
-        // public Dictionary<string, Person> People {get{return people;}}
         Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
         public Dictionary<string, GameObject> GameObjects {get{return gameObjects;}}
 
@@ -191,44 +169,25 @@ namespace Intf
         }
     }
 
-    public class Item : GameObject
-    {
-        public Item(string _id) : base(_id) {}
-
-        //public bool takeable = false;
-        //public bool persistent = true;
-        //public bool visible = true;
-    }
-    public class Container : Item
+    public class Container : GameObject
     {
         public Container(string _id) : base(_id) {}
 
         //public bool locked;
-        Dictionary<string, Item> items = new Dictionary<string, Item>();
-        public Dictionary<string, Item> Items {get{return items;}}
+        Dictionary<string, GameObject> items = new Dictionary<string, GameObject>();
+        public Dictionary<string, GameObject> Items {get{return items;}}
 
-        public Item AddItem(string itemID)
+        public GameObject AddItem(string itemID)
         {
-            Item newItem = new Item(itemID);
+            GameObject newItem = new GameObject(itemID);
             items.Add(itemID, newItem);
 
-            // if (locked)
-            // {
-            //     newItem.visible = false;
-            // }
             return newItem;
         }
         public void RemoveItem(string itemID)
         {
             items.Remove(itemID);
         }
-    }
-
-    public class Person : GameObject
-    {
-        public Person(string _id) : base(_id) {}
-
-        //public List<string> acceptedGifts;
     }
 
     ////////

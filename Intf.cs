@@ -62,7 +62,8 @@ namespace Intf
     public class Player
     {
         public Room current_room;
-        public List<Item> inventory = new List<Item>();
+        List<Item> inventory = new List<Item>();
+        public List<Item> Inventory {get{return inventory;}}
 
         public bool InInventory(string target)
         {
@@ -88,25 +89,41 @@ namespace Intf
 
         public GameObject GetObject(string target)
         {
-            if (inventory != null)
+            foreach (Item item in inventory)
             {
-                foreach (Item item in inventory)
+                if (item.ID == target)
                 {
-                    if (item.ID == target)
-                    {
-                        return item;
-                    }
+                    return item;
                 }
             }
 
-            if (current_room.GameObjects != null)
+            if (current_room.GameObjects.ContainsKey(target))
             {
-                if (current_room.GameObjects.ContainsKey(target))
+                return current_room.GameObjects[target];
+            }
+
+            return null;
+        }
+
+        public void AddToInventory(string target)
+        {
+            if (current_room.GameObjects.ContainsKey(target))
+            {
+                inventory.Add((Item) current_room.GameObjects[target]);
+                current_room.GameObjects.Remove(target);
+            }
+        }
+        public void RemoveFromInventory(string target)
+        {
+            Item toRemove = null;
+            foreach (Item item in inventory)
+            {
+                if (item.ID == target)
                 {
-                    return current_room.GameObjects[target];
+                    toRemove = item;
                 }
             }
-            return null;
+            inventory.Remove(toRemove);
         }
     }
 
@@ -160,6 +177,10 @@ namespace Intf
         protected Dictionary<string, Func<string, string>> responsesD = new Dictionary<string, Func<string, string>>();
         public Dictionary<string, Func<string, string>> ResponsesD {get{return responsesD;}}
 
+        public Dictionary<string, bool> conditions = new Dictionary<string, bool> ();
+
+        public string description;
+
         public void SetTransitiveCommand(string id, Func<string> responseT)
         {
             responsesT.Add(id, responseT);
@@ -174,31 +195,32 @@ namespace Intf
     {
         public Item(string _id) : base(_id) {}
 
-        public bool takeable = false;
-        public bool persistent = true;
-        public bool visible = true;
+        //public bool takeable = false;
+        //public bool persistent = true;
+        //public bool visible = true;
     }
     public class Container : Item
     {
         public Container(string _id) : base(_id) {}
 
-        public bool locked;
-        Dictionary<string, Item> items;
+        //public bool locked;
+        Dictionary<string, Item> items = new Dictionary<string, Item>();
+        public Dictionary<string, Item> Items {get{return items;}}
 
         public Item AddItem(string itemID)
         {
             Item newItem = new Item(itemID);
-            if (items == null)
-            {
-                items = new Dictionary<string, Item>();
-            }
             items.Add(itemID, newItem);
 
-            if (locked)
-            {
-                newItem.visible = false;
-            }
+            // if (locked)
+            // {
+            //     newItem.visible = false;
+            // }
             return newItem;
+        }
+        public void RemoveItem(string itemID)
+        {
+            items.Remove(itemID);
         }
     }
 
@@ -206,7 +228,7 @@ namespace Intf
     {
         public Person(string _id) : base(_id) {}
 
-        public List<string> acceptedGifts;
+        //public List<string> acceptedGifts;
     }
 
     ////////

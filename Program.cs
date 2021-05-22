@@ -29,7 +29,15 @@ namespace Algiers
             Command look = world.AddCommand("look", CommandType.Intransitive, new string[] {"around"});
             look.aliases = new string[]{"l"};
             world.SetIntransitiveCommand("look", () => {
-                return "look at this";
+                string output = player.current_room.description;
+                foreach (GameObject gameObject in player.current_room.GameObjects.Values)
+                {
+                    if (gameObject.ResponsesT.ContainsKey("look"))
+                    {
+                        output = output + " " + gameObject.ResponsesT["look"]();
+                    }
+                }
+                return output;
             });
 
             Command help = world.AddCommand("help", CommandType.Intransitive);
@@ -114,11 +122,6 @@ namespace Algiers
                     }
                     else
                     {
-                        if (obObj.takeable)
-                        {
-                            player.inventory.Add(obObj);
-                            player.current_room.RemoveObject(obj);
-                        }
                         return obObj.ResponsesT["take"]();
                     }
                 }
@@ -169,10 +172,6 @@ namespace Algiers
                     }
                     else
                     {
-                        if (!obObj.persistent)
-                        {
-                            player.inventory.Remove(obObj);
-                        }
                         return obObj.ResponsesT["use"]();
                     }
                 }
@@ -194,18 +193,15 @@ namespace Algiers
                 else
                 {
                     GameObject targetObj = player.GetObject(target);;
+                    string nullHandler = "You can't use the " + tool + "with the " + target + ".";
                     if (!targetObj.ResponsesD.ContainsKey("use"))
                     {
-                        return "You can't use the " + tool + "with the " + target + ".";
+                        return nullHandler;
                     }
                     else
                     {
-                        Item toolObj = (Item) player.GetObject(tool);;
-                        if (!toolObj.persistent)
-                        {
-                            player.inventory.Remove(toolObj);
-                        }
-                        return targetObj.ResponsesD["use"](tool);
+                        string response = targetObj.ResponsesD["use"](tool);
+                        return (response == null)? nullHandler : response;
                     }
                 }
             });
@@ -217,23 +213,24 @@ namespace Algiers
                 if (!player.InInventory(gift))
                 {
                     string indef = (Parser.StartsWithVowel(gift))? "an " : "a ";
-                    return "You don't have " + indef + gift + " in you inventory";
+                    return "You don't have " + indef + gift + " in you inventory.";
                 }
                 else if (!player.CanAccessObject(person))
                 {
-                    return "There is no " + person + " to give " + gift + " to here";
+                    return "There is nobody named " + person + " here to give the " + gift + " to.";
                 }
                 else
                 {
                     GameObject personObj = player.GetObject(person);
+                    string nullHandler = "You can't give the " + gift + "to the " + person + ".";
                     if (!personObj.ResponsesD.ContainsKey("give"))
                     {
-                        return "You can't give the " + gift + "to the " + person + ".";
+                        return nullHandler;
                     }
                     else
                     {
-                        player.inventory.Remove((Item) player.GetObject(gift));
-                        return personObj.ResponsesD["give"](gift);
+                        string response = personObj.ResponsesD["give"](gift);
+                        return (response == null)? nullHandler : response;
                     }
                 }
             });
@@ -249,8 +246,51 @@ namespace Algiers
 
             //CHAIR
             Item chair = chambre.AddObject<Item>("chair");
+            chair.conditions.Add("marked", false);
+            chair.SetTransitiveCommand("look", () => {
+                if (!chair.conditions["marked"])
+                {
+                    return "There's a chair in the corner.";
+                }
+                else
+                {
+                    return "There's a chair in the corner, covered in scribbles.";
+                }
+            });
+            chair.SetTransitiveCommand("what", () => {
+                if (!chair.conditions["marked"])
+                {
+                    return "It's an old, yellowing wicker chair.";
+                }
+                else
+                {
+                    return "It's an old, yellowing wicker chair. It's covered in black streaks.";
+                }
+            });
             chair.SetTransitiveCommand("take", () => {
-                return "The chair is too heavy to pick up";
+                return "The chair is too heavy to pick up.";
+            });
+            chair.SetDitransitiveCommand("give", (gift) => {
+                if (gift == "marker")
+                {
+                    chair.conditions["marked"] = true;
+                    player.RemoveFromInventory("marker");
+                    return "You scrawl all over the chair with the marker.";
+                }
+                else {return null;}
+            });
+
+            //MARKER
+            Item marker = chambre.AddObject<Item>("marker");
+            marker.SetTransitiveCommand("look", () => {
+                return "A marker lies discarded on the floor.";
+            });
+            marker.SetTransitiveCommand("what", () => {
+                return "It's one of those big-ass sharpies. Black.";
+            });
+            marker.SetTransitiveCommand("take", () => {
+                player.AddToInventory("marker");
+                return "You slip the marker into your pocket.";
             });
 
             player.current_room = chambre;

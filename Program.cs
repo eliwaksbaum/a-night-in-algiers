@@ -49,7 +49,21 @@ namespace Algiers
             Command inv = world.AddCommand("inv", CommandType.Intransitive);
             inv.aliases = new string[]{"i", "inventory"};
             world.SetIntransitiveCommand("inv", () => {
-                return "inventory";
+                if (player.Inventory.Count == 0)
+                {
+                    return "Your inventory is empty.";
+                }
+                else
+                {
+                    string output = "";
+                    foreach (string item in player.Inventory.Keys)
+                    {
+                        string first = item.Substring(0, 1).ToUpper();
+                        string rest = item.Substring(1);
+                        output = output + first + rest + ", ";
+                    }
+                    return output.Remove(output.Length - 2);
+                }
             });
 
             Command quit = world.AddCommand("quit", CommandType.Intransitive);
@@ -291,6 +305,19 @@ namespace Algiers
             marker.SetTransitiveCommand("take", () => {
                 player.AddToInventory("marker");
                 return "You slip the marker into your pocket.";
+            });
+
+            //Coin
+            GameObject coin = chambre.AddObject<GameObject>("coin");
+            coin.SetTransitiveCommand("look", () => {
+                return "A coin is stuck between the floorboards.";
+            });
+            coin.SetTransitiveCommand("what", () => {
+                return "It's a greenish penny.";
+            });
+            coin.SetTransitiveCommand("take", () => {
+                player.AddToInventory("coin");
+                return "You slip the penny into your pocket.";
             });
 
             player.current_room = chambre;

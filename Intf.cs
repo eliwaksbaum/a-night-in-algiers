@@ -20,11 +20,11 @@ namespace Intf
         List<Command> commands;
         public List<Command> Commands {get{return commands;}} 
 
-        Dictionary<string, Func<string>> responses;
+        Dictionary<string, Func<string>> responses = new Dictionary<string, Func<string>>();
         public Dictionary<string, Func<string>> Responses {get{return responses;}}
-        Dictionary<string, Func<string, string>> responsesT;
+        Dictionary<string, Func<string, string>> responsesT = new Dictionary<string, Func<string, string>>();
         public Dictionary<string, Func<string, string>> ResponsesT {get{return responsesT;}}
-        Dictionary<string, Func<string, string, string>> responsesD;
+        Dictionary<string, Func<string, string, string>> responsesD = new Dictionary<string, Func<string, string, string>>();
         public Dictionary<string, Func<string, string, string>> ResponsesD {get{return responsesD;}}
 
         public Command AddCommand(string id, CommandType type, string[] preps = null, string[] dipreps = null)
@@ -39,26 +39,14 @@ namespace Intf
         }
         public void SetIntransitiveCommand(string id, Func<string> response)
         {
-            if (responses == null)
-            {
-                responses = new Dictionary<string, Func<string>>();
-            }
             responses.Add(id, response);
         }
         public void SetTransitiveCommand(string id, Func<string, string> responseT)
         {
-            if (responsesT == null)
-            {
-                responsesT = new Dictionary<string, Func<string, string>>();
-            }
             responsesT.Add(id, responseT);
         }
         public void SetDitransitiveCommand(string id, Func<string, string, string> responseD)
         {
-            if (responsesD == null)
-            {
-                responsesD = new Dictionary<string, Func<string, string, string>>();
-            }
             responsesD.Add(id, responseD);
         }
 
@@ -73,49 +61,52 @@ namespace Intf
     //PLAYER
     public class Player
     {
-        Room current_room;
-        List<Item> inventory;
+        public Room current_room;
+        public List<Item> inventory = new List<Item>();
 
-        public bool CanAccessObject(string target)
+        public bool InInventory(string target)
         {
-            bool inInv = false;
             foreach (Item item in inventory)
             {
                 if (item.ID == target)
                 {
-                    inInv = true;
-                    break;
+                    return true;
                 }
             }
+            return false;
+        }
 
-            bool inRoom;
-            inRoom = current_room.Items.ContainsKey(target) || current_room.People.ContainsKey(target);
+        public bool InRoom(string target)
+        {
+            return current_room.GameObjects.ContainsKey(target);
+        }
 
-            return inInv || inRoom;
+        public bool CanAccessObject(string target)
+        {
+            return InInventory(target) || InRoom(target);
         }
 
         public GameObject GetObject(string target)
         {
-            foreach (Item item in inventory)
+            if (inventory != null)
             {
-                if (item.ID == target)
+                foreach (Item item in inventory)
                 {
-                    return item;
+                    if (item.ID == target)
+                    {
+                        return item;
+                    }
                 }
             }
 
-            if (current_room.Items.ContainsKey(target))
+            if (current_room.GameObjects != null)
             {
-               return current_room.Items[target];
+                if (current_room.GameObjects.ContainsKey(target))
+                {
+                    return current_room.GameObjects[target];
+                }
             }
-            else if (current_room.People.ContainsKey(target))
-            {
-               return current_room.People[target];
-            }
-            else
-            {
-                return null;
-            }
+            return null;
         }
     }
 
@@ -124,37 +115,33 @@ namespace Intf
     {
         public Room(string _id)
         {
-            _id = id;
+            id = _id;
         }
 
         string id;
         public string ID {get{return id;}}
         public string description;
         public Dictionary<string, string> exits;
-        Dictionary<string, Item> items;
-        public Dictionary<string, Item> Items {get{return items;}}
-        Dictionary<string, Person> people;
-        public Dictionary<string, Person> People {get{return people;}}
+        // Dictionary<string, Item> items;
+        // public Dictionary<string, Item> Items {get{return items;}}
+        // Dictionary<string, Person> people;
+        // public Dictionary<string, Person> People {get{return people;}}
+        Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
+        public Dictionary<string, GameObject> GameObjects {get{return gameObjects;}}
 
-        public Item AddItem(string itemID)
+        public T AddObject<T>(string objID) where T : GameObject
         {
-            Item newItem = new Item(itemID);
-            if (items == null)
-            {
-                items = new Dictionary<string, Item>();
-            }
-            items.Add(itemID, newItem);
-            return newItem;
+            object[] args = new object[] {objID};
+            T newObj = (T) Activator.CreateInstance(typeof(T), args);
+            gameObjects.Add(objID, newObj);
+            return newObj;
         }
-        public Person AddPerson(string personID)
+        public void RemoveObject(string itemID)
         {
-            Person newPerson = new Person(personID);
-            if (people == null)
+            if (gameObjects.ContainsKey(itemID))
             {
-                people = new Dictionary<string, Person>();
+                gameObjects.Remove(itemID);
             }
-            people.Add(personID, newPerson);
-            return newPerson;
         }
     }
 
@@ -168,25 +155,17 @@ namespace Intf
 
         string id;
         public string ID {get{return id;}}
-        protected Dictionary<string, Func<string>> responsesT;
+        protected Dictionary<string, Func<string>> responsesT = new Dictionary<string, Func<string>>();
         public Dictionary<string, Func<string>> ResponsesT {get{return responsesT;}}
-        protected Dictionary<string, Func<string, string>> responsesD;
+        protected Dictionary<string, Func<string, string>> responsesD = new Dictionary<string, Func<string, string>>();
         public Dictionary<string, Func<string, string>> ResponsesD {get{return responsesD;}}
 
         public void SetTransitiveCommand(string id, Func<string> responseT)
         {
-            if (responsesT == null)
-            {
-                responsesT = new Dictionary<string, Func<string>>();
-            }
             responsesT.Add(id, responseT);
         }
         public void SetDitransitiveCommand(string id, Func<string, string> responseD)
         {
-            if (responsesD == null)
-            {
-                responsesD = new Dictionary<string, Func<string, string>>();
-            }
             responsesD.Add(id, responseD);
         }
     }
@@ -196,8 +175,7 @@ namespace Intf
         public Item(string _id) : base(_id) {}
 
         public bool takeable = false;
-        public bool targetable = false;
-        public List<string> acceptedTools;
+        public bool persistent = true;
         public bool visible = true;
     }
     public class Container : Item
@@ -258,9 +236,6 @@ namespace Intf
         public string [] aliases;
         public string MissingTargetError;
         public string[] MissingTarget2Error;
-        public string[] InaccessibleTargetError;
-        public string[] InaccessibleTarget2Error;
-        public string[] NullHandlerError;
     }
     public struct IntransitiveCmd
     {
@@ -470,6 +445,25 @@ namespace Intf
                     }
                     
                 }
+            }
+        }
+
+        public static bool StartsWithVowel(string str)
+        {
+            switch (str.Substring(0, 1))
+            {
+                case "a":
+                    return true;
+                case "e":
+                    return true;
+                case "i":
+                    return true;
+                case "o":
+                    return true;
+                case "u":
+                    return true;
+                default:
+                    return false;
             }
         }
     }

@@ -23,6 +23,7 @@ namespace Algiers
         {
             World world = new World();
             world.start = "this is the start";
+            Player player = world.player;
 
             //COMMANDS
             Command look = world.AddCommand("look", CommandType.Intransitive, new string[] {"around"});
@@ -44,73 +45,197 @@ namespace Algiers
             });
 
             Command quit = world.AddCommand("quit", CommandType.Intransitive);
-            quit.aliases = new string[]{"quit"};
+            quit.aliases = new string[]{"q"};
             world.SetIntransitiveCommand("quit", () => {
-                world.done = true;
-                return "nice. way to be absurdist";
+                bool quitDone = false;
+                Console.WriteLine("\nAre you sure you want to give up?\n");
+                while (!quitDone)
+                {
+                    string answer = Console.ReadLine();
+                    if (answer == "y" || answer == "yes")
+                    {
+                        quitDone = true;
+                        world.done = true;
+                        return "nice. way to be absurdist\n";
+                    }
+                    else if (answer == "n" || answer == "no")
+                    {
+                        quitDone = true;
+                        return "way to soldier on. gl";
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nAre you sure you want to give up? (yes/no)\n");
+                    }
+                }
+                return "";
             });
             
             Command what = world.AddCommand("examine", CommandType.Transitive);
             what.aliases = new string[]{"what"};
             what.MissingTargetError = "Examine what?";
-            what.InaccessibleTargetError = new string[] {"There is no ", " to examine here."};
-            what.NullHandlerError = new string[] {"You can't examine ", " ."};
             world.SetTransitiveCommand("examine", (obj) => {
-                return "wow check it out";
+                if (!player.CanAccessObject(obj))
+                {
+                    return "There is no " + obj + " to examine here.";
+                }
+                else
+                {
+                    GameObject obObj = player.GetObject(obj);
+                    if (!obObj.ResponsesT.ContainsKey("what"))
+                    {
+                        return "You can't examine the " + obj + ".";
+                    }
+                    else
+                    {
+                        return obObj.ResponsesT["what"]();
+                    }
+                }
             });
 
             Command take = world.AddCommand("take", CommandType.Transitive, new string[]{"up"});
             take.aliases = new string[]{"pick"};
             take.MissingTargetError = "Take what?";
-            take.InaccessibleTargetError = new string[] {"There is no ", " to take here."};
-            take.NullHandlerError = new string[] {"You can't take ", " ."};
             world.SetTransitiveCommand("take", (obj) => {
-                return "thief!";
+                if (player.InInventory(obj))
+                {
+                    return "You already have the " + obj + " in your inventory";
+                }
+                else if (!player.InRoom(obj))
+                {
+                    return "There is no " + obj + " to take here.";
+                }
+                else
+                {
+                    Item obObj = (Item) player.GetObject(obj);
+                    if (!obObj.ResponsesT.ContainsKey("take"))
+                    {
+                        return "You can't take the " + obj + ".";
+                    }
+                    else
+                    {
+                        if (obObj.takeable)
+                        {
+                            player.inventory.Add(obObj);
+                            player.current_room.RemoveObject(obj);
+                        }
+                        return obObj.ResponsesT["take"]();
+                    }
+                }
             });
 
             Command talk = world.AddCommand("talk", CommandType.Transitive, new string[]{"to", "with"});
             talk.MissingTargetError = "Talk to whom?";
-            talk.InaccessibleTargetError = new string[] {"There is nobody named ", " to talk to here."};
-            talk.NullHandlerError = new string[] {"You can't talk to ", " ."};
             world.SetTransitiveCommand("talk", (obj) => {
-                return "yatta yatta";
+                if (!player.InRoom(obj))
+                {
+                    return "There is nobody named " + obj + " to talk to here.";
+                }
+                else
+                {
+                    GameObject obObj = player.GetObject(obj);
+                    if (!obObj.ResponsesT.ContainsKey("talk"))
+                    {
+                        return "You can't talk to the " + obj + ".";
+                    }
+                    else
+                    {
+                        return obObj.ResponsesT["talk"]();
+                    }
+                }
             });
 
             Command go = world.AddCommand("go", CommandType.Transitive, new string[]{"to"});
             go.aliases = new string[]{"travel"};
             go.MissingTargetError = "Go where?";
-            go.InaccessibleTargetError = new string[] {"There is no ", " to go to from here"};
-            go.NullHandlerError = new string[] {"You can't go to ", " ."};
             world.SetTransitiveCommand("go", (obj) => {
                 return "zoom zoom";
             });
 
             Command useT = world.AddCommand("use", CommandType.Transitive);
             useT.MissingTargetError = "Use what?";
-            useT.InaccessibleTargetError= new string[] {"You don't have ", " in your inventory."};
-            useT.NullHandlerError = new string[] {"You can't use ", " ."};
             world.SetTransitiveCommand("use", (obj) => {
-                return "beep boop";
+                if (!player.InInventory(obj))
+                {
+                    string indef = (Parser.StartsWithVowel(obj))? "an " : "a ";
+                    return "You don't have " + indef + obj + " in you inventory";
+                }
+                else
+                {
+                    Item obObj = (Item) player.GetObject(obj);
+                    if (!obObj.ResponsesT.ContainsKey("use"))
+                    {
+                        return "You can't use the " + obj + ".";
+                    }
+                    else
+                    {
+                        if (!obObj.persistent)
+                        {
+                            player.inventory.Remove(obObj);
+                        }
+                        return obObj.ResponsesT["use"]();
+                    }
+                }
             });
 
             Command useD = world.AddCommand("use", CommandType.Ditransitive, dipreps: new string[]{"on", "with"});
             useD.MissingTargetError = "Use what?";
-            useD.InaccessibleTargetError = new string[] {"You don't have ", " in your inventory."};
-            useD.NullHandlerError = new string[] {"You can't use ", " on "};
             useD.MissingTarget2Error = new string[] {"Use ", " on what?"};
-            useD.InaccessibleTarget2Error = new string[] {"There is no ", " to use ", " on here."};
-            world.SetDitransitiveCommand("use", (obj1, obj2) => {
-                return "beep boop the bop";
+            world.SetDitransitiveCommand("use", (tool, target) => {
+                if (!player.InInventory(tool))
+                {
+                    string indef = (Parser.StartsWithVowel(tool))? "an " : "a ";
+                    return "You don't have " + indef + tool + " in you inventory.";
+                }
+                else if (!player.CanAccessObject(target))
+                {
+                    return "There is no " + target + " to use " + tool + " on here.";
+                }
+                else
+                {
+                    GameObject targetObj = player.GetObject(target);;
+                    if (!targetObj.ResponsesD.ContainsKey("use"))
+                    {
+                        return "You can't use the " + tool + "with the " + target + ".";
+                    }
+                    else
+                    {
+                        Item toolObj = (Item) player.GetObject(tool);;
+                        if (!toolObj.persistent)
+                        {
+                            player.inventory.Remove(toolObj);
+                        }
+                        return targetObj.ResponsesD["use"](tool);
+                    }
+                }
             });
 
             Command give = world.AddCommand("give", CommandType.Ditransitive, dipreps: new string[]{"to"});
             give.MissingTargetError = "Give what?";
-            give.InaccessibleTargetError = new string[] {"You don't have ", " in your inventory."};
-            give.NullHandlerError = new string[] {"You can't give ", " to "};
             give.MissingTarget2Error = new string[] {"Give ", " to whom?"};
-            give.InaccessibleTarget2Error = new string[] {"There is nobody named ", " to give ", " to here."};
-            world.SetDitransitiveCommand("give", (obj1, obj2) => {
-                return "here ya go";
+            world.SetDitransitiveCommand("give", (gift, person) => {
+                if (!player.InInventory(gift))
+                {
+                    string indef = (Parser.StartsWithVowel(gift))? "an " : "a ";
+                    return "You don't have " + indef + gift + " in you inventory";
+                }
+                else if (!player.CanAccessObject(person))
+                {
+                    return "There is no " + person + " to give " + gift + " to here";
+                }
+                else
+                {
+                    GameObject personObj = player.GetObject(person);
+                    if (!personObj.ResponsesD.ContainsKey("give"))
+                    {
+                        return "You can't give the " + gift + "to the " + person + ".";
+                    }
+                    else
+                    {
+                        player.inventory.Remove((Item) player.GetObject(gift));
+                        return personObj.ResponsesD["give"](gift);
+                    }
+                }
             });
 
             //CHAMBRE
@@ -123,8 +248,12 @@ namespace Algiers
             };
 
             //CHAIR
-            Item chair = chambre.AddItem("chair");
+            Item chair = chambre.AddObject<Item>("chair");
+            chair.SetTransitiveCommand("take", () => {
+                return "The chair is too heavy to pick up";
+            });
 
+            player.current_room = chambre;
             return world;
         }
     }

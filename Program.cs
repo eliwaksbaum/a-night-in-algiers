@@ -154,8 +154,17 @@ namespace Algiers
             });
 
             Command go = world.AddTransitiveCommand("go", CommandType.Transitive, "Go where?", new string[]{"travel"}, new string[]{"to"});
-            world.SetTransitiveCommand("go", (obj) => {
-                return "zoom zoom";
+            world.SetTransitiveCommand("go", (newRoom) => {
+                if (!player.current_room.Exits.ContainsKey(newRoom))
+                {
+                    return "There's no " + newRoom + " to go to from here.";
+                }
+                else
+                {
+                    string newRoomID = player.current_room.Exits[newRoom];
+                    player.current_room = world.Rooms[newRoomID];
+                    return world.Responses["look"]();
+                }
             });
 
             Command use = world.AddDitransitiveCommand("use", CommandType.Ditransitive, "Use what?", new string[]{"on", "with"});
@@ -226,12 +235,8 @@ namespace Algiers
 
             //CHAMBRE
             Room chambre = world.AddRoom("chambre");
-            chambre.description = "This is the bedroom.";
-            chambre.exits = new Dictionary<string, string>
-            {
-                {"left", "balcony"},
-                {"right", "antechambre"}
-            };
+            chambre.description = "This is the bedroom. The door to the BALCONY is on your left.";
+            chambre.AddExit("left", "balcony");
 
             //CHAIR
             GameObject chair = chambre.AddObject<GameObject>("chair");
@@ -295,6 +300,26 @@ namespace Algiers
             });
             coin.SetTransitiveCommand("use", () => {
                 return "You flip the coin in the air.";
+            });
+
+            //BALCONY
+            Room balcony = world.AddRoom("balcony");
+            balcony.description = "This is the balcony. Behind you is the BEDROOM.";
+
+            //PIPE
+            GameObject pipe = balcony.AddObject<GameObject>("pipe"); 
+            pipe.SetTransitiveCommand("look", () => {
+                return "A pipe is out here.";
+            });
+            pipe.SetTransitiveCommand("what", () => {
+                return "It's an old beat-up pipe.";
+            });
+            pipe.SetTransitiveCommand("take", () => {
+                player.AddToInventory("pipe");
+                return "You pick up the pipe.";
+            });
+            pipe.SetTransitiveCommand("use", () => {
+                return "You don't really feel like smoking, actually.";
             });
 
             player.current_room = chambre;

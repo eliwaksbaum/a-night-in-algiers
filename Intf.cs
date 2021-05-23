@@ -16,6 +16,7 @@ namespace Intf
         public string inputChar = ">";
 
         Dictionary<string, Room> rooms = new Dictionary<string, Room>();
+        public Dictionary<string, Room> Rooms {get{return rooms;}}
 
         List<Command> commands = new List<Command>();
         public List<Command> Commands {get{return commands;}} 
@@ -129,7 +130,8 @@ namespace Intf
         string id;
         public string ID {get{return id;}}
         public string description;
-        public Dictionary<string, string> exits;
+        Dictionary<string, string> exits = new Dictionary<string, string>();
+        public Dictionary<string, string> Exits {get{return exits;}}
         Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
         public Dictionary<string, GameObject> GameObjects {get{return gameObjects;}}
 
@@ -146,6 +148,11 @@ namespace Intf
             {
                 gameObjects.Remove(itemID);
             }
+        }
+
+        public void AddExit(string goWord, string roomID)
+        {
+            exits.Add(goWord, roomID);
         }
     }
 

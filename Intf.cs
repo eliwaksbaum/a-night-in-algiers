@@ -17,7 +17,7 @@ namespace Intf
 
         Dictionary<string, Room> rooms = new Dictionary<string, Room>();
 
-        List<Command> commands;
+        List<Command> commands = new List<Command>();
         public List<Command> Commands {get{return commands;}} 
 
         Dictionary<string, Func<string>> responses = new Dictionary<string, Func<string>>();
@@ -27,16 +27,25 @@ namespace Intf
         Dictionary<string, Func<string, string, string>> responsesD = new Dictionary<string, Func<string, string, string>>();
         public Dictionary<string, Func<string, string, string>> ResponsesD {get{return responsesD;}}
 
-        public Command AddCommand(string id, CommandType type, string[] preps = null, string[] dipreps = null)
+        public Command AddIntransitiveCommand(string id, CommandType type, string[] aliases = null, string[] preps = null)
         {
-            Command cmd = new Command(id, type, preps, dipreps);
-            if (commands == null)
-            {
-                commands = new List<Command>();
-            }
+            Command cmd = new Command(id, type, _aliases: aliases, _preps: preps);
             commands.Add(cmd);
             return cmd;
         }
+        public Command AddTransitiveCommand(string id, CommandType type, string missingTargetError, string[] aliases = null, string[] preps = null)
+        {
+            Command cmd = new Command(id, type, missingTargetError, _aliases: aliases, _preps: preps);
+            commands.Add(cmd);
+            return cmd;
+        }
+        public Command AddDitransitiveCommand(string id, CommandType type, string missingTargetError, string[] dipreps, string[] aliases = null)
+        {
+            Command cmd = new Command(id, type, missingTargetError, dipreps, aliases);
+            commands.Add(cmd);
+            return cmd;
+        }
+
         public void SetIntransitiveCommand(string id, Func<string> response)
         {
             responses.Add(id, response);
@@ -197,12 +206,15 @@ namespace Intf
     public enum CommandType {Intransitive, Transitive, Ditransitive, Multi}
     public class Command
     {
-        public Command(string _id, CommandType _type, string[] _preps = null, string[] _dipreps = null)
+        public Command(string _id, CommandType _type, string _missingTargetError = null,
+        string[] _dipreps = null, string[] _aliases = null, string[] _preps = null)
         {
             id = _id;
             type = _type;
-            preps = _preps;
+            missingTargetError = _missingTargetError;
             dipreps = _dipreps;
+            aliases = _aliases;
+            preps = _preps;
         }
         
         CommandType type;
@@ -213,9 +225,10 @@ namespace Intf
         public string[] Preps {get{return preps;}}
         string[] dipreps;
         public string[] Dipreps {get{return dipreps;}}
-
-        public string [] aliases;
-        public string MissingTargetError;
+        string [] aliases;
+        public string [] Aliases {get{return aliases;}}
+        string missingTargetError;
+        public string MissingTargetError {get{return missingTargetError;}}
     }
     public struct IntransitiveCmd
     {
@@ -276,9 +289,9 @@ namespace Intf
                     return cmd;
                 }
                 
-                if (cmd.aliases != null)
+                if (cmd.Aliases != null)
                 {
-                    foreach (string nickname in cmd.aliases)
+                    foreach (string nickname in cmd.Aliases)
                     {
                         if (nickname == word0)
                         {

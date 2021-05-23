@@ -26,8 +26,7 @@ namespace Algiers
             Player player = world.player;
 
             //COMMANDS
-            Command look = world.AddCommand("look", CommandType.Intransitive, new string[] {"around"});
-            look.aliases = new string[]{"l"};
+            Command look = world.AddIntransitiveCommand("look", CommandType.Intransitive, new string[]{"l"}, preps: new string[] {"around"});
             world.SetIntransitiveCommand("look", () => {
                 string output = player.current_room.description;
                 foreach (GameObject gameObject in player.current_room.GameObjects.Values)
@@ -40,14 +39,12 @@ namespace Algiers
                 return output;
             });
 
-            Command help = world.AddCommand("help", CommandType.Intransitive);
-            help.aliases = new string[]{"h"};
+            Command help = world.AddIntransitiveCommand("help", CommandType.Intransitive, new string[]{"h"});
             world.SetIntransitiveCommand("help", () => {
                 return "heh gl";
             });
             
-            Command inv = world.AddCommand("inv", CommandType.Intransitive);
-            inv.aliases = new string[]{"i", "inventory"};
+            Command inv = world.AddIntransitiveCommand("inv", CommandType.Intransitive, new string[]{"i", "inventory"});
             world.SetIntransitiveCommand("inv", () => {
                 if (player.Inventory.Count == 0)
                 {
@@ -66,8 +63,7 @@ namespace Algiers
                 }
             });
 
-            Command quit = world.AddCommand("quit", CommandType.Intransitive);
-            quit.aliases = new string[]{"q"};
+            Command quit = world.AddIntransitiveCommand("quit", CommandType.Intransitive, new string[]{"q"});
             world.SetIntransitiveCommand("quit", () => {
                 bool quitDone = false;
                 Console.WriteLine("\nAre you sure you want to give up?\n");
@@ -93,9 +89,7 @@ namespace Algiers
                 return "";
             });
             
-            Command what = world.AddCommand("examine", CommandType.Transitive);
-            what.aliases = new string[]{"what"};
-            what.MissingTargetError = "Examine what?";
+            Command what = world.AddTransitiveCommand("examine", CommandType.Transitive, "Examine what?", new string[]{"what"});
             world.SetTransitiveCommand("examine", (obj) => {
                 if (!player.CanAccessObject(obj))
                 {
@@ -115,9 +109,7 @@ namespace Algiers
                 }
             });
 
-            Command take = world.AddCommand("take", CommandType.Transitive, new string[]{"up"});
-            take.aliases = new string[]{"pick"};
-            take.MissingTargetError = "Take what?";
+            Command take = world.AddTransitiveCommand("take", CommandType.Transitive, "Take what?", new string[]{"pick"}, new string[]{"up"});
             world.SetTransitiveCommand("take", (obj) => {
                 if (player.InInventory(obj))
                 {
@@ -141,8 +133,7 @@ namespace Algiers
                 }
             });
 
-            Command talk = world.AddCommand("talk", CommandType.Transitive, new string[]{"to", "with"});
-            talk.MissingTargetError = "Talk to whom?";
+            Command talk = world.AddTransitiveCommand("talk", CommandType.Transitive, "Talk to whom", preps: new string[]{"to", "with"});
             world.SetTransitiveCommand("talk", (obj) => {
                 if (!player.InRoom(obj))
                 {
@@ -162,15 +153,12 @@ namespace Algiers
                 }
             });
 
-            Command go = world.AddCommand("go", CommandType.Transitive, new string[]{"to"});
-            go.aliases = new string[]{"travel"};
-            go.MissingTargetError = "Go where?";
+            Command go = world.AddTransitiveCommand("go", CommandType.Transitive, "Go where?", new string[]{"travel"}, new string[]{"to"});
             world.SetTransitiveCommand("go", (obj) => {
                 return "zoom zoom";
             });
 
-            Command use = world.AddCommand("use", CommandType.Ditransitive, dipreps: new string[]{"on", "with"});
-            use.MissingTargetError = "Use what?";
+            Command use = world.AddDitransitiveCommand("use", CommandType.Ditransitive, "Use what?", new string[]{"on", "with"});
             world.SetDitransitiveCommand("use", (tool, target) => {
                 if (!player.InInventory(tool))
                 {
@@ -205,8 +193,7 @@ namespace Algiers
                 }
             });
 
-            Command give = world.AddCommand("give", CommandType.Ditransitive, dipreps: new string[]{"to"});
-            give.MissingTargetError = "Give what?";
+            Command give = world.AddDitransitiveCommand("give", CommandType.Ditransitive, "Give what?", new string[]{"to"});
             world.SetDitransitiveCommand("give", (gift, person) => {
                 if (!player.InInventory(gift))
                 {

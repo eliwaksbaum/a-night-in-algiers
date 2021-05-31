@@ -113,7 +113,7 @@ namespace Algiers
             world.SetTransitiveCommand("take", (obj) => {
                 if (player.InInventory(obj))
                 {
-                    return "You already have the " + obj + " in your inventory";
+                    return "You already have the " + obj + " in your inventory.";
                 }
                 else if (!player.InRoom(obj))
                 {
@@ -172,7 +172,7 @@ namespace Algiers
                 if (!player.InInventory(tool))
                 {
                     string indef = (Parser.StartsWithVowel(tool))? "an " : "a ";
-                    return "You don't have " + indef + tool + " in you inventory.";
+                    return "You don't have " + indef + tool + " in your inventory.";
                 }
                 else if (player.GetObject(tool).ResponsesT.ContainsKey("use"))
                 {
@@ -232,95 +232,154 @@ namespace Algiers
                     }
                 }
             });
+            //COMMANDS||
+
 
             //CHAMBRE
             Room chambre = world.AddRoom("chambre");
-            chambre.description = "This is the bedroom. The door to the BALCONY is on your left.";
-            chambre.AddExit("left", "balcony");
+            chambre.description = "The bedroom has some saggy straw chiars, a WARDROBE whose mirror has gone yellow, a TABLE, and a brass bed. A cool breeze flows in from the BALCONY. The door to the empty ROOM hangs open.";
+            chambre.AddExit("balcony", "balcony");
+            chambre.AddExit("room", "antechambre");
 
-            //CHAIR
-            GameObject chair = chambre.AddObject<GameObject>("chair");
-            chair.conditions.Add("marked", false);
-            chair.SetTransitiveCommand("look", () => {
-                if (!chair.conditions["marked"])
-                {
-                    return "There's a chair in the corner.";
-                }
-                else
-                {
-                    return "There's a chair in the corner, covered in scribbles.";
-                }
-            });
-            chair.SetTransitiveCommand("what", () => {
-                if (!chair.conditions["marked"])
-                {
-                    return "It's an old, yellowing wicker chair.";
-                }
-                else
-                {
-                    return "It's an old, yellowing wicker chair. It's covered in black streaks.";
-                }
-            });
-            chair.SetTransitiveCommand("take", () => {
-                return "The chair is too heavy to pick up.";
-            });
-            chair.SetDitransitiveCommand("use", (tool) => {
-                if (tool == "marker")
-                {
-                    chair.conditions["marked"] = true;
-                    return "You scrawl all over the chair with the marker.";
-                }
-                else {return null;}
-            });
+                //WARDROBE
+                Container wardrobe = chambre.AddObject<Container>("wardrobe");
+                wardrobe.conditions.Add("locked", true);
+                wardrobe.conditions.Add("stuck", true);
+                wardrobe.SetTransitiveCommand("what", () => {
+                    if (wardrobe.conditions["locked"])
+                        {return "It's an old wooden wardrobe. You think you left something in it, but it's locked.";}
+                    else if (wardrobe.conditions["stuck"])
+                        {return "The wardrobe is unlocked, but it's stuck shut. You think you could pry it open but don't know with what.";}
+                    else if (wardrobe.GameObjects.ContainsKey("pipe"))
+                        {return "Inside the wardrobe is only dust and an old PIPE.";}
+                    else
+                        {return "The wardrobe is empty.";}
+                });
+                wardrobe.SetDitransitiveCommand("use", (tool) => {
+                    if (wardrobe.conditions["locked"] && tool == "key")
+                        {return "The key fits in the wardrobe drawer. You turn it and hear a click.";}
+                    else if(wardrobe.conditions["stuck"] && tool == "knife")
+                        {return "You slip the knife between the doors and the wardrobe pops open.";}
+                    else {return null;}
+                });
+                wardrobe.SetTransitiveCommand("take", () => {
+                    return "The wardrobe is too heavy to move.";
+                });
+                    //PIPE
+                    GameObject pipe = wardrobe.AddObject("pipe");
+                    pipe.SetTransitiveCommand("what", () => {
+                        return "An old pipe. You'd forgotten you had it.";
+                    });
+                    pipe.SetTransitiveCommand("take", () => {
+                        player.AddToInventory("pipe", wardrobe);
+                        return "You take the pipe. Maybe you'll have a smoke on the balcony.";
+                    });
+                    pipe.SetTransitiveCommand("use", () => {
+                        return "You realize you're out of tobacco. You can't be bothered to go out and buy any.";
+                    });
+                    
 
-            //MARKER
-            GameObject marker = chambre.AddObject<GameObject>("marker");
-            marker.SetTransitiveCommand("look", () => {
-                return "A marker lies discarded on the floor.";
-            });
-            marker.SetTransitiveCommand("what", () => {
-                return "It's one of those big-ass sharpies. Black.";
-            });
-            marker.SetTransitiveCommand("take", () => {
-                player.AddToInventory("marker");
-                return "You slip the marker into your pocket.";
-            });
+                //TABLE
+                GameObject table = chambre.AddObject<GameObject>("table");
+                table.SetTransitiveCommand("what", () => {
+                    return "A dark brown wooden table. A pile of LAUNDRY and a PAN sit on top.";
+                });
+                table.SetTransitiveCommand("take", () => {
+                    return "The table is stuck to the floor";
+                });
+                
+                //LAUNDRY
+                GameObject laundry = chambre.AddObject<GameObject>("laundry");
+                laundry.SetTransitiveCommand("what", () => {
+                    return "A pile of laundry you haven't felt like washing. A white SHIRT and a dark pair of PANTS lie on top.";
+                });
+                laundry.SetTransitiveCommand("take", () => {
+                    return "No, you'd rather not do the washing now.";
+                });
 
-            //Coin
-            GameObject coin = chambre.AddObject<GameObject>("coin");
-            coin.SetTransitiveCommand("look", () => {
-                return "A coin is stuck between the floorboards.";
-            });
-            coin.SetTransitiveCommand("what", () => {
-                return "It's a greenish penny.";
-            });
-            coin.SetTransitiveCommand("take", () => {
-                player.AddToInventory("coin");
-                return "You slip the penny into your pocket.";
-            });
-            coin.SetTransitiveCommand("use", () => {
-                return "You flip the coin in the air.";
-            });
+                //SHIRT
+                Container shirt = chambre.AddObject<Container>("shirt");
+                shirt.SetTransitiveCommand("what", () => {
+                    string response = "A nice what shirt. The breast pocket is stained blue.";
+                    if (shirt.GameObjects.ContainsKey("pen"))
+                        {response = response + " You must have left your PEN in it.";}
+                    return response;
+                });
+                shirt.SetTransitiveCommand("take", () => {
+                    return "You shouldn't go out in a stained shirt.";
+                });
+                    //PEN
+                    GameObject pen = shirt.AddObject("pen");
+                    pen.SetTransitiveCommand("what", () => {
+                        return "A fine, blue pen.";
+                    });
+                    pen.SetTransitiveCommand("take", () => {
+                        player.AddToInventory("pen", shirt);
+                        return "Hopefully it doesn't leak again.";
+                    });
+                    
+                //PANTS
+                Container pants = chambre.AddObject<Container>("pants");
+                pants.SetTransitiveCommand("what", () => {
+                    string response = "A wrinkled pair of pants.";
+                    if (pants.GameObjects.Count != 0)
+                    {
+                        response = response + " There seems to be something in the pocket. You reach inside and find ";
+                        if (pants.GameObjects.ContainsKey("armband") && pants.GameObjects.ContainsKey("ticket"))
+                        {
+                            response = response + "a movie TICKET and your black ARMBAND.";
+                        }
+                        else if (pants.GameObjects.ContainsKey("armband"))
+                        {
+                            response = response + "your black ARMBAND.";
+                        }
+                        else if (pants.GameObjects.ContainsKey("ticket"))
+                        {
+                            response = response + "a movie TICKET";
+                        }
+                    }
+                    return response;
+                });
+                    //ARMBAND
+                    GameObject armband = pants.AddObject("armband");
+                    armband.SetTransitiveCommand("what", () => {
+                        return "The black arm band from Maman's funeral.";
+                    });
+                    armband.SetTransitiveCommand("take", () => {
+                        player.AddToInventory("armband", pants);
+                        return "You think about putting it on, but stuff it in your pocket instead. You don't feel like mourning any more.";
+                    });
+                    armband.SetTransitiveCommand("use", () => {
+                        return "You'd rather not wear the armband. You don't feel like mourning anymore.";
+                    });
+                    //TICKET
+                    GameObject ticket = pants.AddObject("ticket");
+                    ticket.SetTransitiveCommand("what", () => {
+                        return "The ticket from the movie you took Marie to last night. The Fernandel one. It was funny, but too stupid.";
+                    });
+                    ticket.SetTransitiveCommand("take", () => {
+                        player.AddToInventory("ticket", pants);
+                        return "You take the ticket. It's not worth keeping around.";
+                    });            
 
+                //PAN
+                GameObject pan = chambre.AddObject<GameObject>("pan");
+                pan.SetTransitiveCommand("what", () => {
+                    return "A cheap cooking pan. Looking at it makes you hungry, but you're all out of anything you could fry.";
+                });
+                pan.SetTransitiveCommand("take", () => {
+                    return "You should leave the pan in your room";
+                });
+                pan.SetDitransitiveCommand("take", (tool) => {
+                    if (tool == "eggs")
+                        {return "On second thought, you can't be bothered to cook anything.";}
+                    else
+                        {return null;}
+                });
+            
             //BALCONY
-            Room balcony = world.AddRoom("balcony");
-            balcony.description = "This is the balcony. Behind you is the BEDROOM.";
 
-            //PIPE
-            GameObject pipe = balcony.AddObject<GameObject>("pipe"); 
-            pipe.SetTransitiveCommand("look", () => {
-                return "A pipe is out here.";
-            });
-            pipe.SetTransitiveCommand("what", () => {
-                return "It's an old beat-up pipe.";
-            });
-            pipe.SetTransitiveCommand("take", () => {
-                player.AddToInventory("pipe");
-                return "You pick up the pipe.";
-            });
-            pipe.SetTransitiveCommand("use", () => {
-                return "You don't really feel like smoking, actually.";
-            });
+            //ANTECHAMBRE
 
             player.current_room = chambre;
             return world;

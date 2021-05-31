@@ -82,7 +82,7 @@ namespace Intf
 
         public bool InRoom(string target)
         {
-            return current_room.GameObjects.ContainsKey(target);
+            return current_room.InRoom(target);
         }
 
         public bool CanAccessObject(string target)
@@ -92,25 +92,25 @@ namespace Intf
 
         public GameObject GetObject(string target)
         {
-            if (inventory.ContainsKey(target))
+            if (InInventory(target))
             {
                 return inventory[target];
             }
 
-            if (current_room.GameObjects.ContainsKey(target))
+            if (InRoom(target))
             {
-                return current_room.GameObjects[target];
+                return current_room.GetObject(target);
             }
 
             return null;
         }
 
-        public void AddToInventory(string target)
+        public void AddToInventory(string target, IOrigin origin)
         {
-            if (current_room.GameObjects.ContainsKey(target))
+            if (origin.GameObjects.ContainsKey(target))
             {
-                inventory.Add(target, current_room.GameObjects[target]);
-                current_room.GameObjects.Remove(target);
+                inventory.Add(target, origin.GameObjects[target]);
+                origin.RemoveObject(target);
             }
         }
         public void RemoveFromInventory(string target)
@@ -119,8 +119,15 @@ namespace Intf
         }
     }
 
+    //ORIGN
+    public interface IOrigin
+    {
+        void RemoveObject(string target);
+        Dictionary<string, GameObject> GameObjects {get;}
+    }
+
     //ROOM
-    public class Room
+    public class Room : IOrigin
     {
         public Room(string _id)
         {
@@ -135,12 +142,24 @@ namespace Intf
         Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
         public Dictionary<string, GameObject> GameObjects {get{return gameObjects;}}
 
+        Dictionary<string, Container> containers = new Dictionary<string, Container>();
+
         public T AddObject<T>(string objID) where T : GameObject
         {
-            object[] args = new object[] {objID};
-            T newObj = (T) Activator.CreateInstance(typeof(T), args);
+            GameObject newObj;
+
+            if (typeof(T) == typeof(Container))
+            {
+                newObj = new Container(objID);
+                containers.Add(objID, (Container) newObj);
+            }
+            else
+            {
+                newObj = new GameObject(objID);
+            }
+
             gameObjects.Add(objID, newObj);
-            return newObj;
+            return (T) newObj;
         }
         public void RemoveObject(string itemID)
         {
@@ -153,6 +172,38 @@ namespace Intf
         public void AddExit(string goWord, string roomID)
         {
             exits.Add(goWord, roomID);
+        }
+
+        public bool InRoom(string target)
+        {
+            bool inBase = gameObjects.ContainsKey(target);
+            foreach (Container container in containers.Values)
+            {
+                if (container.GameObjects.ContainsKey(target))
+                {
+                    return true;
+                }
+            }
+            return inBase;
+        }
+
+        public GameObject GetObject(string target)
+        {
+            if (gameObjects.ContainsKey(target))
+            {
+                return gameObjects[target];
+            }
+            else
+            {
+                foreach (Container container in containers.Values)
+                {
+                    if (container.GameObjects.ContainsKey(target))
+                    {
+                        return container.GameObjects[target];
+                    }
+                }
+            }
+            return null;
         }
     }
 
@@ -185,22 +236,21 @@ namespace Intf
         }
     }
 
-    public class Container : GameObject
+    public class Container : GameObject, IOrigin
     {
         public Container(string _id) : base(_id) {}
 
-        //public bool locked;
         Dictionary<string, GameObject> items = new Dictionary<string, GameObject>();
-        public Dictionary<string, GameObject> Items {get{return items;}}
+        public Dictionary<string, GameObject> GameObjects {get{return items;}}
 
-        public GameObject AddItem(string itemID)
+        public GameObject AddObject(string itemID)
         {
             GameObject newItem = new GameObject(itemID);
             items.Add(itemID, newItem);
 
             return newItem;
         }
-        public void RemoveItem(string itemID)
+        public void RemoveObject(string itemID)
         {
             items.Remove(itemID);
         }

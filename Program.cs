@@ -396,7 +396,17 @@ namespace Algiers
             
             //BALCONY
             Room balcony = world.AddRoom("balcony");
-
+            balcony.description = "You gaze out over the city. Behind you is the BEDROOM.";
+            balcony.AddExit("bedroom", "chambre");
+                
+                //EMMANUEL
+                GameObject emmanuel = balcony.AddObject<GameObject>("emmanuel");
+                emmanuel.SetTransitiveCommand("look", () => {
+                    return "Below you, you see EMMANUEL waving up at you.";
+                });
+                emmanuel.SetTransitiveCommand("talk", () => {
+                    return "Hey, pal. Come outside. I want to talk to you.";
+                });
 
             //ANTECHAMBRE
 

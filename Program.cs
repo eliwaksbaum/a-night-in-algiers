@@ -274,7 +274,7 @@ namespace Algiers
                 });
                 wardrobe.SetDitransitiveCommand("use", (tool) => {
                     if (wardrobe.conditions["locked"] && tool == "key")
-                        {return "The key fits in the wardrobe drawer. You turn it and hear a click.";}
+                        {return "You turn the key in the lock, but the wardrobe stays shut. You think you need to pry it open somehow.";}
                     else if(wardrobe.conditions["stuck"] && tool == "knife")
                         {return "You slip the knife between the doors and the wardrobe pops open.";}
                     else {return null;}
@@ -343,17 +343,11 @@ namespace Algiers
                     {
                         response = response + " There seems to be something in the pocket. You reach inside and find ";
                         if (pants.GameObjects.ContainsKey("armband") && pants.GameObjects.ContainsKey("ticket"))
-                        {
-                            response = response + "a movie TICKET and your black ARMBAND.";
-                        }
+                            {response = response + "a movie TICKET and your black ARMBAND.";}
                         else if (pants.GameObjects.ContainsKey("armband"))
-                        {
-                            response = response + "your black ARMBAND.";
-                        }
+                            {response = response + "your black ARMBAND.";}
                         else if (pants.GameObjects.ContainsKey("ticket"))
-                        {
-                            response = response + "a movie TICKET";
-                        }
+                            {response = response + "a movie TICKET";}
                     }
                     return response;
                 });
@@ -414,6 +408,63 @@ namespace Algiers
             antechambre.AddExit("bedroom", "chambre");
             antechambre.AddExit("left", "landing");
 
+            //LANDING
+            Room landing = world.AddRoom("landing");
+            landing.description = "RAYMOND is leaning against the wall, smoking a cigarette. The door to your APARTMENT hangs ajar. The doors to the other apartments are all closed. A staircase leads OUTSIDE.";
+            landing.AddExit("apartment", "antechambre");
+            landing.AddExit("outside", "street");
+
+                //KEY
+                GameObject key = landing.AddObject<GameObject>("key");
+                key.SetTransitiveCommand("look", () => {
+                    return "On the top step lies a familiar looking KEY.";
+                });
+                key.SetTransitiveCommand("what", () => {
+                    return "The key to your wardrobe. You must have dropped it.";
+                });
+                key.SetTransitiveCommand("take", () => {
+                    player.AddToInventory("key", landing);
+                    return "You pick the key up off the staircase.";
+                });
+
+                //RAYMOND
+                Person raymond = landing.AddObject<Person>("raymond");
+                raymond.conditions.Add("firstTalk", false);
+                raymond.SetTransitiveCommand("talk", () => {
+                    if (raymond.Gifts.Count == 0 && !raymond.conditions["firstTalk"])
+                        {
+                            raymond.conditions["firstTalk"] = true;
+                            return "'Monsieur Meursault, would you mind doing me a favor? There's this girl, see, and I need to write her a letter. And the only pen I have is the entirely wrong kind of pen for this letter. Could I borrow a pen of yours, a fine pen, Monsieur?'";
+                        }
+                    else if (raymond.Gifts.Count == 0 && raymond.conditions["firstTalk"])
+                        {return "'Do you have a fine pen I could borrow, Monsieur?'";}
+                    else if (raymond.Gifts.Count == 1)
+                        {return "'Have you found a nice seashell for my letter, Monsieur?'";}
+                    else if (raymond.Gifts.Count == 2)
+                        {return "'Thanks again, Mersault. You're a real pal.'";}
+                    else
+                        {return null;}
+                });
+                raymond.SetDitransitiveCommand("give", (gift) => {
+                    if (raymond.Gifts.Count == 0 && gift == "pen")
+                    {
+                        player.RemoveFromInventory("pen");
+                        raymond.AddGift("pen");
+                        return "'Thank you, Monsieur. Might I ask you another favor? This girl, see, she loves the ocean. I think if I put in a little seashell with this letter it might go over better with her. Do you think you could find me a nice little seashell?'";
+                    }
+                    else if (raymond.Gifts.Count == 1 && gift == "seashell")
+                    {
+                        player.RemoveFromInventory("seashell");
+                        raymond.AddGift("seashell");
+                        return "'Why, thank you Mersault. I think this will do the trick. I don't know what this girl has gotten so upset over, anyway. It was nothing, really.'";
+                    }
+                    else
+                    {
+                        string indef = Parser.StartsWithVowel(gift)? " an " : " a ";
+                        string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " Mersault, ";
+                        return "'Why," + epy + "what would I do with" + indef + gift + "?'";
+                    }
+                });
 
             player.current_room = chambre;
             return world;

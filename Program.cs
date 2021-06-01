@@ -441,7 +441,7 @@ namespace Algiers
                     else if (raymond.Gifts.Count == 1)
                         {return "'Have you found a nice seashell for my letter, Monsieur?'";}
                     else if (raymond.Gifts.Count == 2)
-                        {return "'Thanks again, Mersault. You're a real pal.'";}
+                        {return "'Thanks again, Meursault. You're a real pal.'";}
                     else
                         {return null;}
                 });
@@ -456,12 +456,12 @@ namespace Algiers
                     {
                         player.RemoveFromInventory("seashell");
                         raymond.AddGift("seashell");
-                        return "'Why, thank you Mersault. I think this will do the trick. I don't know what this girl has gotten so upset over, anyway. It was nothing, really.'";
+                        return "'Why, thank you Meursault. I think this will do the trick. I don't know what this girl has gotten so upset over, anyway. It was nothing, really.'";
                     }
                     else
                     {
                         string indef = Parser.StartsWithVowel(gift)? " an " : " a ";
-                        string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " Mersault, ";
+                        string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " Meursault, ";
                         return "'Why," + epy + "what would I do with" + indef + gift + "?'";
                     }
                 });

@@ -409,6 +409,11 @@ namespace Algiers
                 });
 
             //ANTECHAMBRE
+            Room antechambre = world.AddRoom("antechambre");
+            antechambre.description = "The room is empty. Since Maman went to the home, you moved everything to your BEDROOM. Everything is easier that way. The door to the landing is on your LEFT.";
+            antechambre.AddExit("bedroom", "chambre");
+            antechambre.AddExit("left", "landing");
+
 
             player.current_room = chambre;
             return world;

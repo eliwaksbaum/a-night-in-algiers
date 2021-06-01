@@ -21,8 +21,23 @@ namespace Algiers
 
         static World SetWorld()
         {
+            string instructions = String.Join(Environment.NewLine,
+                "",
+                "help, h - display this list of commands",
+                "inventory, inv, i - display your inventory",
+                "look, l (around) - look at your surroundings",
+                "go, travel (to) - move to a new room",
+                "examine, what - examine a particular object",
+                "take, pick up - take an item and place it in your inventory",
+                "talk (to) - talk to another character in the room",
+                "use - use an item in your inventory",
+                "use .. on / with - use an item in your inventory on something in the room",
+                "give .. to - give an item in your inventory to another character in the room",
+                "",
+                ""
+            );
             World world = new World();
-            world.start = "this is the start";
+            world.start = instructions + "You awake in your bedroom.";
             Player player = world.player;
 
             //COMMANDS
@@ -74,12 +89,12 @@ namespace Algiers
                     {
                         quitDone = true;
                         world.done = true;
-                        return "nice. way to be absurdist\n";
+                        return "You decide nothing is really worth doing today. You make your way to your balcony and look out onto the city, watching life pass by. It is a beautiful night in Algiers." + Environment.NewLine;
                     }
                     else if (answer == "n" || answer == "no")
                     {
                         quitDone = true;
-                        return "way to soldier on. gl";
+                        return "You seem to have lost your train of thought. Were you in the middle of something?";
                     }
                     else
                     {
@@ -237,9 +252,11 @@ namespace Algiers
 
             //CHAMBRE
             Room chambre = world.AddRoom("chambre");
-            chambre.description = "The bedroom has some saggy straw chiars, a WARDROBE whose mirror has gone yellow, a TABLE, and a brass bed. A cool breeze flows in from the BALCONY. The door to the empty ROOM hangs open.";
+            chambre.description = "The bedroom has some saggy straw chairs, a tall wooden WARDROBE, a TABLE, and a brass bed. A cool breeze flows in from the BALCONY. The door to the empty ROOM hangs open.";
             chambre.AddExit("balcony", "balcony");
             chambre.AddExit("room", "antechambre");
+            chambre.AddObject<GameObject>("chairs");
+            chambre.AddObject<GameObject>("bed");
 
                 //WARDROBE
                 Container wardrobe = chambre.AddObject<Container>("wardrobe");
@@ -378,6 +395,8 @@ namespace Algiers
                 });
             
             //BALCONY
+            Room balcony = world.AddRoom("balcony");
+
 
             //ANTECHAMBRE
 

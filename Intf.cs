@@ -155,7 +155,8 @@ namespace Intf
             }
             else
             {
-                newObj = new GameObject(objID);
+                Object[] args = new Object[] {objID};
+                newObj = (T) Activator.CreateInstance(typeof(T), args);
             }
 
             gameObjects.Add(objID, newObj);
@@ -253,6 +254,19 @@ namespace Intf
         public void RemoveObject(string itemID)
         {
             items.Remove(itemID);
+        }
+    }
+
+    public class Person : GameObject
+    {
+        public Person(string _id) : base(_id) {}
+
+        List<string> gifts = new List<string>();
+        public List<string> Gifts {get{return gifts;}}
+
+        public void AddGift(string giftID)
+        {
+            gifts.Add(giftID);
         }
     }
 

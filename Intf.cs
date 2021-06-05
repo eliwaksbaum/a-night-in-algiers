@@ -334,6 +334,7 @@ namespace Intf
 
     public class Parser
     {
+        static public string Clear = Environment.NewLine + Environment.NewLine;
         
         static public string Parse(string input, World world)
         {

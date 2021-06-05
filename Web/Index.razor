@@ -1,0 +1,38 @@
+﻿@page "/"
+
+<div id="container">
+    <div id="output-div">
+        <pre id="output-box">@output</pre>
+    </div>
+    <input id="input-box" @bind="input" @bind:event="oninput" @onkeydown="OnKey"/>	
+</div>
+
+@using Intf
+@code {
+    private string input;
+    private string output = "Press Enter to Start.";
+    private bool playing = false;
+    private World world;
+
+    private void OnKey(KeyboardEventArgs args)
+    {
+        if (args.Code == "Enter")
+        {
+            if (!playing)
+            {
+                world = AlgiersWorld.SetWorld();
+                output = world.start + Parser.Clear;
+                playing = true;
+            }
+            else if (!world.done)
+            {
+                output += ">" + input + Parser.Clear;
+                string response = Parser.Parse(input, world);
+                output += response + Parser.Clear;
+                input = "";
+            }
+        }
+    }
+
+    //OutputDiv.scrollTop = OutputDiv.scrollHeight
+}

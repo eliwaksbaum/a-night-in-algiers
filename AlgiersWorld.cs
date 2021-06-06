@@ -257,9 +257,15 @@ public class AlgiersWorld
             });
             wardrobe.SetDitransitiveCommand("use", (tool) => {
                 if (wardrobe.conditions["locked"] && tool == "key")
-                    {return "You turn the key in the lock, but the wardrobe stays shut. You think you need to pry it open somehow.";}
+                {
+                    wardrobe.conditions["locked"] = false;
+                    return "You turn the key in the lock, but the wardrobe stays shut. You think you need to pry it open somehow.";
+                }
                 else if(wardrobe.conditions["stuck"] && tool == "knife")
-                    {return "You slip the knife between the doors and the wardrobe pops open.";}
+                {
+                    wardrobe.conditions["stuck"] = false;
+                    return "You slip the knife between the doors and the wardrobe pops open.";
+                }
                 else {return null;}
             });
             wardrobe.SetTransitiveCommand("take", () => {
@@ -377,11 +383,11 @@ public class AlgiersWorld
         balcony.AddExit("bedroom", "chambre");
             
             //EMMANUEL
-            GameObject emmanuel = balcony.AddObject<GameObject>("emmanuel");
-            emmanuel.SetTransitiveCommand("look", () => {
+            GameObject emmanuel_bal = balcony.AddObject<GameObject>("emmanuel");
+            emmanuel_bal.SetTransitiveCommand("look", () => {
                 return "Below you, you see EMMANUEL waving up at you.";
             });
-            emmanuel.SetTransitiveCommand("talk", () => {
+            emmanuel_bal.SetTransitiveCommand("talk", () => {
                 return "Hey, pal. Come outside. I want to talk to you.";
             });
 
@@ -446,6 +452,62 @@ public class AlgiersWorld
                     string indef = Parser.StartsWithVowel(gift)? " an " : " a ";
                     string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " Meursault, ";
                     return "'Why," + epy + "what would I do with" + indef + gift + "?'";
+                }
+            });
+        
+        //STREET
+        Room street = world.AddRoom("street");
+        street.description = "You stand on a busy street corner. Celeste's RESTAURANT is across the way. A stone staircase leads down to the BEACH.";
+        street.AddExit("restaurant", "restaurant");
+        street.AddExit("beach", "beach");
+        street.AddExit("building", "landing");
+
+            //KNIFE
+            GameObject knife = street.AddObject<GameObject>("knife");
+            knife.SetTransitiveCommand("look", () => {
+                return "The sun glints off of a small KNIFE lying discarded on the pavement.";
+            });
+            knife.SetTransitiveCommand("what", () => {
+                return "A short, rusted knife.";
+            });
+            knife.SetTransitiveCommand("take", () => {
+                player.AddToInventory("knife", street);
+                return "You squint from the glare as you pick the knife up off the street. You never know when a knife might be useful.";
+            });
+
+            //EMMANUEL
+            Person emmanuel_st = street.AddObject<Person>("emmanuel");
+            emmanuel_st.conditions.Add("firstTalk", false);
+            emmanuel_st.SetTransitiveCommand("look", () => {
+                return "EMMANUEL stands outside the BUILDING. He waves at you.";
+            });
+            emmanuel_st.SetTransitiveCommand("talk", () => {
+                if (!emmanuel_st.conditions["firstTalk"] && emmanuel_st.Gifts.Count == 0)
+                {
+                    emmanuel_st.conditions["firstTalk"] = true;
+                    return "'Hey, pal. Do you remember the name of that movie you took Marie to the other day? I'd like to take this girl to see it tonight.'" + Environment.NewLine + "You can't remember what the movie was called. You tell Emmanuel you'll just give him the ticket.";
+                }
+                else if (emmanuel_st.Gifts.Count == 0)
+                {
+                    return "'Did you find that movie ticket?'";
+                }
+                else
+                {
+                    return "Thanks again, sport.";
+                }
+            });
+            emmanuel_st.SetDitransitiveCommand("give", (gift) => {
+                if (gift == "ticket")
+                {
+                    player.RemoveFromInventory("ticket");
+                    emmanuel_st.AddGift("ticket");
+                    balcony.RemoveObject("emmanuel");
+                    return "'Ah, the Fernandel one. Sounds fun. Thanks, sport.'";
+                }
+                else
+                {
+                    string ind = Parser.StartsWithVowel(gift)? " an " : " a ";
+                    return "'Well, I'm not sure what I'd do with" + ind + gift + ", pal.'";
                 }
             });
 

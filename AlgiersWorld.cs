@@ -454,7 +454,7 @@ public class AlgiersWorld
                     return "'Why," + epy + "what would I do with" + indef + gift + "?'";
                 }
             });
-        
+
         //STREET
         Room street = world.AddRoom("street");
         street.description = "You stand on a busy street corner. Celeste's RESTAURANT is across the way. A stone staircase leads down to the BEACH.";
@@ -510,6 +510,32 @@ public class AlgiersWorld
                     return "'Well, I'm not sure what I'd do with" + ind + gift + ", pal.'";
                 }
             });
+        
+        //BEACH
+        Room beach = world.AddRoom("beach");
+        beach.description = "The sun beats down on the white sand. The stone stairs lead back up to the STREET.";
+        beach.AddExit("street", "street");
+
+            //SEASHELL
+            GameObject seashell = beach.AddObject<GameObject>("seashell");
+            seashell.SetTransitiveCommand("look", () => {
+                return "You notice a SEASHELL in the sand.";
+            });
+            seashell.SetTransitiveCommand("what", () => {
+                return "A small, pretty seashell.";
+            });
+            seashell.SetTransitiveCommand("take", () => {
+                player.AddToInventory("seashell", beach);
+                return "You pick up the seashell. It is surprisingly smooth.";
+            });
+
+            //MARIE
+            Person marie = beach.AddObject<Person>("marie");
+            marie.SetTransitiveCommand("look", () => {
+                return "MARIE is swimming in the water. She looks so good.";
+            });
+            //give: accepting necklace, rejecting else
+            //talk: before giving, after giving
 
         player.current_room = chambre;
         return world;

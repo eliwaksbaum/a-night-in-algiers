@@ -531,8 +531,50 @@ public class AlgiersWorld
 
             //MARIE
             Person marie = beach.AddObject<Person>("marie");
+            marie.conditions.Add("swimming", true);
+            marie.conditions.Add("first", false);
+            marie.conditions.Add("second", false);
             marie.SetTransitiveCommand("look", () => {
-                return "MARIE is swimming in the water. She looks so good.";
+                if (marie.conditions["swimming"])
+                    {return "MARIE is swimming in the water. She looks so good.";}
+                else
+                    {return "MARIE is sitting on the sand. You want her so bad.";}
+            });
+            marie.SetTransitiveCommand("talk", () => {
+                if (marie.conditions["swimming"])
+                {
+                    marie.conditions["swimming"] = false;
+                    return "MARIE wades out of the water. Her tan makes her face look like a flower. She wants to know what you've been doing today; you tell her nothing, really.";
+                }
+                else if (!marie.conditions["first"])
+                {
+                    marie.conditions["first"] = true;
+                    return "'Do you love me?'" + Environment.NewLine + "You tell her it doesn't mean anything but that you don't think so.";
+                }
+                else if (!marie.conditions["second"])
+                {
+                    marie.conditions["second"] = true;
+                    return "'Do you want to marry me?'" + Environment.NewLine + "You tell her it doesn't make any difference to you and that you could if she wanted to.";
+                }
+                else
+                    {return "'You're peculiar. That's probably why I love you.'";}
+            });
+            marie.SetDitransitiveCommand("give", (gift) => {
+                if (gift == "necklace")
+                {
+                    string response = "You hand Marie the necklace. She seems happy with it. She smiles at you and laughs in such a way that you kiss her.";
+                    if (marie.conditions["swimming"])
+                    {
+                        marie.conditions["swimming"] = false;
+                        response = "MARIE wades out of the water. Her tan makes her face look like a flower. " + response;
+                    }
+                    return response;
+                }
+                else
+                {
+                    string ind = Parser.StartsWithVowel(gift)? " an " : " a ";
+                    return "You don't think Marie would like" + ind + gift + " very much.";
+                }
             });
             //give: accepting necklace, rejecting else
             //talk: before giving, after giving

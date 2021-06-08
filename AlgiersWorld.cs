@@ -10,7 +10,7 @@ public class AlgiersWorld
             "inventory, inv, i - display your inventory",
             "look, l (around) - look at your surroundings",
             "go, travel (to) - move to a new room",
-            "examine, what - examine a particular object",
+            "examine, what - examine a an object in the room or in your inventory",
             "take, pick up - take an item and place it in your inventory",
             "talk (to) - talk to another character in the room",
             "use - use an item in your inventory",
@@ -24,7 +24,9 @@ public class AlgiersWorld
         Player player = world.player;
 
         //COMMANDS
-        Command look = world.AddIntransitiveCommand("look", CommandType.Intransitive, new string[]{"l"}, preps: new string[] {"around"});
+
+        //LOOK
+        world.AddIntransitiveCommand("look", CommandType.Intransitive, new string[]{"l"}, preps: new string[] {"around"});
         world.SetIntransitiveCommand("look", () => {
             string output = player.current_room.description;
             foreach (GameObject gameObject in player.current_room.GameObjects.Values)
@@ -37,12 +39,14 @@ public class AlgiersWorld
             return output;
         });
 
-        Command help = world.AddIntransitiveCommand("help", CommandType.Intransitive, new string[]{"h"});
+        //HELP
+        world.AddIntransitiveCommand("help", CommandType.Intransitive, new string[]{"h"});
         world.SetIntransitiveCommand("help", () => {
-            return "heh gl";
+            return instructions;
         });
         
-        Command inv = world.AddIntransitiveCommand("inv", CommandType.Intransitive, new string[]{"i", "inventory"});
+        //INV
+        world.AddIntransitiveCommand("inv", CommandType.Intransitive, new string[]{"i", "inventory"});
         world.SetIntransitiveCommand("inv", () => {
             if (player.Inventory.Count == 0)
             {
@@ -61,7 +65,8 @@ public class AlgiersWorld
             }
         });
 
-        Command quit = world.AddIntransitiveCommand("quit", CommandType.Intransitive, new string[]{"q"});
+        //QUIT
+        world.AddIntransitiveCommand("quit", CommandType.Intransitive, new string[]{"q"});
         world.SetIntransitiveCommand("quit", () => {
             bool quitDone = false;
             Console.WriteLine("\nAre you sure you want to give up?\n");
@@ -87,7 +92,8 @@ public class AlgiersWorld
             return "";
         });
         
-        Command what = world.AddTransitiveCommand("examine", CommandType.Transitive, "Examine what?", new string[]{"what"});
+        //WHAT
+        world.AddTransitiveCommand("examine", CommandType.Transitive, "Examine what?", new string[]{"what"});
         world.SetTransitiveCommand("examine", (obj) => {
             if (!player.CanAccessObject(obj))
             {
@@ -107,7 +113,8 @@ public class AlgiersWorld
             }
         });
 
-        Command take = world.AddTransitiveCommand("take", CommandType.Transitive, "Take what?", new string[]{"pick"}, new string[]{"up"});
+        //TAKE
+        world.AddTransitiveCommand("take", CommandType.Transitive, "Take what?", new string[]{"pick"}, new string[]{"up"});
         world.SetTransitiveCommand("take", (obj) => {
             if (player.InInventory(obj))
             {
@@ -131,7 +138,8 @@ public class AlgiersWorld
             }
         });
 
-        Command talk = world.AddTransitiveCommand("talk", CommandType.Transitive, "Talk to whom?", preps: new string[]{"to", "with"});
+        //TALK
+        world.AddTransitiveCommand("talk", CommandType.Transitive, "Talk to whom?", preps: new string[]{"to", "with"});
         world.SetTransitiveCommand("talk", (obj) => {
             if (!player.InRoom(obj))
             {
@@ -151,7 +159,8 @@ public class AlgiersWorld
             }
         });
 
-        Command go = world.AddTransitiveCommand("go", CommandType.Transitive, "Go where?", new string[]{"travel"}, new string[]{"to"});
+        //GO
+        world.AddTransitiveCommand("go", CommandType.Transitive, "Go where?", new string[]{"travel"}, new string[]{"to"});
         world.SetTransitiveCommand("go", (newRoom) => {
             if (!player.current_room.Exits.ContainsKey(newRoom))
             {
@@ -165,7 +174,8 @@ public class AlgiersWorld
             }
         });
 
-        Command use = world.AddDitransitiveCommand("use", CommandType.Ditransitive, "Use what?", new string[]{"on", "with"});
+        //USE
+        world.AddDitransitiveCommand("use", CommandType.Ditransitive, "Use what?", new string[]{"on", "with"});
         world.SetDitransitiveCommand("use", (tool, target) => {
             if (!player.InInventory(tool))
             {
@@ -200,7 +210,8 @@ public class AlgiersWorld
             }
         });
 
-        Command give = world.AddDitransitiveCommand("give", CommandType.Ditransitive, "Give what?", new string[]{"to"});
+        //GIVE
+        world.AddDitransitiveCommand("give", CommandType.Ditransitive, "Give what?", new string[]{"to"});
         world.SetDitransitiveCommand("give", (gift, person) => {
             if (!player.InInventory(gift))
             {

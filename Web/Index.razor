@@ -25,10 +25,33 @@
                 output = world.start + Parser.Clear;
                 playing = true;
             }
-            else if (!world.done && !String.IsNullOrWhiteSpace(input))
+            else if (!world.done)
             {
+                string response = "";
                 output += ">" + input + Parser.Clear;
-                string response = Parser.Parse(input, world);
+
+                if (world.state == "play")
+                {
+                    response = Parser.Parse(input, world);
+                }
+                else if (world.state == "quit")
+                {
+                    if (input == "y" || input == "yes")
+                    {
+                        world.done = true;
+                        response = "You decide nothing is really worth doing today. You make your way to your balcony and look out onto the city, watching life pass by. It is a beautiful night in Algiers.";
+                    }
+                    else if (input == "n" || input == "no")
+                    {
+                        world.state = "play";
+                        response = "You seem to have lost your train of thought. Were you in the middle of something?";
+                    }
+                    else
+                    {
+                        response = "Are you sure you want to give up? (yes/no)";
+                    }
+                }
+
                 output += response + Parser.Clear;
                 input = "";
             }

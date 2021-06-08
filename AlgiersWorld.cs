@@ -11,6 +11,7 @@ public class AlgiersWorld
             "look, l (around) - look at your surroundings",
             "go, travel (to) - move to a new room",
             "examine, what - examine a an object in the room or in your inventory",
+            "who (is) - examine a person in the room",
             "take, pick up - take an item and place it in your inventory",
             "talk (to) - talk to another character in the room",
             "use - use an item in your inventory",
@@ -109,6 +110,27 @@ public class AlgiersWorld
                 else
                 {
                     return obObj.ResponsesT["what"]();
+                }
+            }
+        });
+
+        //WHO
+        world.AddTransitiveCommand("who", CommandType.Transitive, "Who is whom?", preps: new string[]{"is"});
+        world.SetTransitiveCommand("who", (person) => {
+            if (!player.CanAccessObject(person))
+            {
+                return "There is nobody named " + person + " to examine here.";
+            }
+            else
+            {
+                GameObject personObj = player.GetObject(person);
+                if (!personObj.ResponsesT.ContainsKey("who"))
+                {
+                    return person + " is not a person.";
+                }
+                else
+                {
+                    return personObj.ResponsesT["who"]();
                 }
             }
         });
@@ -401,6 +423,9 @@ public class AlgiersWorld
             emmanuel_bal.SetTransitiveCommand("talk", () => {
                 return "Hey, pal. Come outside. I want to talk to you.";
             });
+            emmanuel_bal.SetTransitiveCommand("who", () => {
+                return "Emmanuel works as a dispatcher. He doesn't always understand what's going, but he's good fun.";
+            });
 
         //ANTECHAMBRE
         Room antechambre = world.AddRoom("antechambre");
@@ -461,9 +486,12 @@ public class AlgiersWorld
                 else
                 {
                     string indef = Parser.StartsWithVowel(gift)? " an " : " a ";
-                    string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " Meursault, ";
+                    string epy = (raymond.Gifts.Count < 2)? " Monsieur, " : " pal, ";
                     return "'Why," + epy + "what would I do with" + indef + gift + "?'";
                 }
+            });
+            raymond.SetTransitiveCommand("who", () => {
+                return "His name is Raymond Sintès. He's a little on the short side, with broad shoulders and a nose like a boxer's. He always dresses very sharp. The word around the neighborhood is that he lives off women.";
             });
 
         //STREET
@@ -520,6 +548,9 @@ public class AlgiersWorld
                     string ind = Parser.StartsWithVowel(gift)? " an " : " a ";
                     return "'Well, I'm not sure what I'd do with" + ind + gift + ", pal.'";
                 }
+            });
+            emmanuel_st.SetTransitiveCommand("who", () => {
+                return "Emmanuel works as a dispatcher. He doesn't always understand what's going, but he's good fun.";
             });
         
         //BEACH
@@ -587,6 +618,9 @@ public class AlgiersWorld
                     return "You don't think Marie would like" + ind + gift + " very much.";
                 }
             });
+            marie.SetTransitiveCommand("who", () => {
+                return "Maire Cardona, a former typist in your office whom you'd had a thing for at the time. She's darker than you.";
+            });
 
         //RESTAURANT
         Room restaurant = world.AddRoom("restaurant");
@@ -605,6 +639,9 @@ public class AlgiersWorld
             });
             celeste.SetDitransitiveCommand("give", (gift) => {
                 return "What's this? Don't worry about your bill; those are just details between us.";
+            });
+            celeste.SetTransitiveCommand("who", () => {
+                return "The owner of the restaurant. He has a big belly, a white moustache, and always wears his apron.";
             });
                 //EGGS
                 GameObject eggs = celeste.AddObject("eggs");

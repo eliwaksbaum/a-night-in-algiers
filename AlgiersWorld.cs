@@ -576,8 +576,54 @@ public class AlgiersWorld
                     return "You don't think Marie would like" + ind + gift + " very much.";
                 }
             });
-            //give: accepting necklace, rejecting else
-            //talk: before giving, after giving
+
+        //RESTAURANT
+        Room restaurant = world.AddRoom("restaurant");
+        restaurant.description = "The door back to the STREET creaks when you open it. The restaurant is quiet. CELESTE stands behind the register. The chrome finish on the BAR catches the sunlight.";
+        restaurant.AddExit("street", "street");
+
+            //CELESTE
+            Container celeste = restaurant.AddObject<Container>("celeste");
+            celeste.SetTransitiveCommand("talk", () => {
+                string response = "I'm sorry for your loss, Monsieur. You only have one mother.";
+                if (celeste.GameObjects.ContainsKey("eggs"))
+                {
+                    response = response + " I've a few extra EGGS today, if you want any.";
+                }
+                return response;
+            });
+            celeste.SetDitransitiveCommand("give", (gift) => {
+                return "What's this? Don't worry about your bill; those are just details between us.";
+            });
+                //EGGS
+                GameObject eggs = celeste.AddObject("eggs");
+                eggs.SetTransitiveCommand("what", () => {
+                    return "A few extra eggs Celeste is letting you have.";
+                });
+                eggs.SetTransitiveCommand("take", () => {
+                    player.AddToInventory("eggs", celeste);
+                    return "You decide to take two eggs. You wonder if you ought to have taken three";
+                });
+
+            //BAR
+            Container bar = restaurant.AddObject<Container>("bar");
+            bar.SetTransitiveCommand("what", () => {
+                string response = "It hurts to look at the bar; you can feel the sunlight reflecting off of it.";
+                if (bar.GameObjects.ContainsKey("necklace"))
+                {
+                    response = response + " Somone left a NECKLACE draping off the edge.";
+                }
+                return response;
+            });
+                //NECKLACE
+                GameObject necklace = bar.AddObject("necklace");
+                necklace.SetTransitiveCommand("what", () => {
+                    return "A simple, gold necklace. You think it would look nice on Marie.";
+                });
+                necklace.SetTransitiveCommand("take", () => {
+                    player.AddToInventory("necklace", bar);
+                    return"There's no way to find out whose it is. Might as well take it.";
+                });
 
         player.current_room = chambre;
         return world;

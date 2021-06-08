@@ -17,11 +17,10 @@ public class AlgiersWorld
             "use - use an item in your inventory",
             "use .. on / with - use an item in your inventory on something in the room",
             "give .. to - give an item in your inventory to another character in the room",
-            "",
             ""
         );
         World world = new World();
-        world.start = instructions + "You awake in your bedroom.";
+        world.start = instructions + Environment.NewLine + "You awake in your bedroom.";
         Player player = world.player;
 
         //COMMANDS

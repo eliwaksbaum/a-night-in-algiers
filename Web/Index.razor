@@ -1,10 +1,11 @@
 ﻿@page "/"
+@inject IJSRuntime JS
 
 <div id="container">
     <div id="output-div">
         <pre id="output-box">@output</pre>
     </div>
-    <input id="input-box" @bind="input" @bind:event="oninput" @onkeydown="OnKey"/>	
+    <input id="input-box" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
 </div>
 
 @using Intf
@@ -14,7 +15,7 @@
     private bool playing = false;
     private World world;
 
-    private void OnKey(KeyboardEventArgs args)
+    private void OnKeyDown(KeyboardEventArgs args)
     {
         if (args.Code == "Enter")
         {
@@ -24,7 +25,7 @@
                 output = world.start + Parser.Clear;
                 playing = true;
             }
-            else if (!world.done)
+            else if (!world.done && !String.IsNullOrWhiteSpace(input))
             {
                 output += ">" + input + Parser.Clear;
                 string response = Parser.Parse(input, world);
@@ -34,5 +35,11 @@
         }
     }
 
-    //OutputDiv.scrollTop = OutputDiv.scrollHeight
+    private async void OnKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Code == "Enter")
+        {
+            await JS.InvokeVoidAsync("scrollTerminal");
+        }
+    }
 }

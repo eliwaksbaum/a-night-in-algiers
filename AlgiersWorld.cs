@@ -131,7 +131,7 @@ public class AlgiersWorld
             }
         });
 
-        Command talk = world.AddTransitiveCommand("talk", CommandType.Transitive, "Talk to whom", preps: new string[]{"to", "with"});
+        Command talk = world.AddTransitiveCommand("talk", CommandType.Transitive, "Talk to whom?", preps: new string[]{"to", "with"});
         world.SetTransitiveCommand("talk", (obj) => {
             if (!player.InRoom(obj))
             {
@@ -235,7 +235,7 @@ public class AlgiersWorld
 
         //CHAMBRE
         Room chambre = world.AddRoom("chambre");
-        chambre.description = "The bedroom has some saggy straw chairs, a tall wooden WARDROBE, a TABLE, and a brass bed. A cool breeze flows in from the BALCONY. The door to the empty ROOM hangs open.";
+        chambre.description = "The bedroom has some saggy straw chairs, a WARDROBE whose mirror has gone yellow, a dressing TABLE, and a brass bed. A cool breeze flows in from the BALCONY. The door to the empty ROOM hangs open.";
         chambre.AddExit("balcony", "balcony");
         chambre.AddExit("room", "antechambre");
         chambre.AddObject<GameObject>("chairs");
@@ -370,9 +370,9 @@ public class AlgiersWorld
             pan.SetTransitiveCommand("take", () => {
                 return "You should leave the pan in your room";
             });
-            pan.SetDitransitiveCommand("take", (tool) => {
+            pan.SetDitransitiveCommand("use", (tool) => {
                 if (tool == "eggs")
-                    {return "On second thought, you can't be bothered to cook anything.";}
+                    {return "You realize you don't have any bread left and you don't feel like going downstairs to buy some. It doesn't seem worth eating, anyhow.";}
                 else
                     {return null;}
             });
@@ -445,7 +445,7 @@ public class AlgiersWorld
                 {
                     player.RemoveFromInventory("seashell");
                     raymond.AddGift("seashell");
-                    return "'Why, thank you Meursault. I think this will do the trick. I don't know what this girl has gotten so upset over, anyway. It was nothing, really.'";
+                    return "'I think this will do the trick. Now you're a pal, Meursault. I don't know what this girl has gotten so upset over, anyway. It was nothing, really.'";
                 }
                 else
                 {
@@ -457,7 +457,7 @@ public class AlgiersWorld
 
         //STREET
         Room street = world.AddRoom("street");
-        street.description = "You stand on a busy street corner. Celeste's RESTAURANT is across the way. A stone staircase leads down to the BEACH.";
+        street.description = "You stand on a busy street corner. Celeste's RESTAURANT is across the way, next to the streetcar stop for the line to the BEACH.";
         street.AddExit("restaurant", "restaurant");
         street.AddExit("beach", "beach");
         street.AddExit("building", "landing");
@@ -513,8 +513,8 @@ public class AlgiersWorld
         
         //BEACH
         Room beach = world.AddRoom("beach");
-        beach.description = "The sun beats down on the white sand. The stone stairs lead back up to the STREET.";
-        beach.AddExit("street", "street");
+        beach.description = "The sun beats down on the white sand. The stone stairs lead back up to where you can catch a streetcar back to your BLOCK.";
+        beach.AddExit("block", "street");
 
             //SEASHELL
             GameObject seashell = beach.AddObject<GameObject>("seashell");

@@ -11,6 +11,7 @@ namespace Intf
     public class World
     {
         public bool done = false;
+        public string state;
         public string start;
         public Player player = new Player();
         public string inputChar = ">";
@@ -339,6 +340,12 @@ namespace Intf
         static public string Parse(string input, World world)
         {
             input = input.ToLower();
+
+            if (String.IsNullOrWhiteSpace(input))
+            {
+                return "Please type a command.";
+            }
+
             string[] words = (input.Contains(" "))?
                 input.Split(" ", StringSplitOptions.RemoveEmptyEntries) : new string[]{input};
 

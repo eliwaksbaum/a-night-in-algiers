@@ -20,6 +20,7 @@ public class AlgiersWorld
             ""
         );
         World world = new World();
+        world.state = "play";
         world.start = instructions + Environment.NewLine + "You awake in your bedroom.";
         Player player = world.player;
 
@@ -68,28 +69,8 @@ public class AlgiersWorld
         //QUIT
         world.AddIntransitiveCommand("quit", CommandType.Intransitive, new string[]{"q"});
         world.SetIntransitiveCommand("quit", () => {
-            bool quitDone = false;
-            Console.WriteLine("\nAre you sure you want to give up?\n");
-            while (!quitDone)
-            {
-                string answer = Console.ReadLine();
-                if (answer == "y" || answer == "yes")
-                {
-                    quitDone = true;
-                    world.done = true;
-                    return "You decide nothing is really worth doing today. You make your way to your balcony and look out onto the city, watching life pass by. It is a beautiful night in Algiers." + Environment.NewLine;
-                }
-                else if (answer == "n" || answer == "no")
-                {
-                    quitDone = true;
-                    return "You seem to have lost your train of thought. Were you in the middle of something?";
-                }
-                else
-                {
-                    Console.WriteLine("\nAre you sure you want to give up? (yes/no)\n");
-                }
-            }
-            return "";
+            world.state = "quit";
+            return "Are you sure you want to give up?";
         });
         
         //WHAT

@@ -10,13 +10,14 @@ public class AlgiersWorld
             "inventory, inv, i - display your inventory",
             "look, l (around) - look at your surroundings",
             "go, travel (to) - move to a new room",
-            "examine, what - examine a an object in the room or in your inventory",
+            "examine, what - examine an object in the room or in your inventory",
             "who (is) - examine a person in the room",
             "take, pick up - take an item and place it in your inventory",
             "talk (to) - talk to another character in the room",
             "use - use an item in your inventory",
             "use .. on / with - use an item in your inventory on something in the room",
             "give .. to - give an item in your inventory to another character in the room",
+            "quit - give up and exit the game",
             ""
         );
         World world = new World();
@@ -372,16 +373,16 @@ public class AlgiersWorld
                 });
                 ticket.SetTransitiveCommand("take", () => {
                     player.AddToInventory("ticket", pants);
-                    return "You take the ticket. It's not worth keeping around.";
+                    return "You take the ticket.";
                 });            
 
             //PAN
             GameObject pan = chambre.AddObject<GameObject>("pan");
             pan.SetTransitiveCommand("what", () => {
-                return "A cheap cooking pan. Looking at it makes you hungry, but you're all out of anything you could fry.";
+                return "A cheap cooking pan. Looking at it makes you hungry, but you're all out of anything you could cook.";
             });
             pan.SetTransitiveCommand("take", () => {
-                return "You should leave the pan in your room";
+                return "You'd rather not walk around holding a pan. You leave it in your room.";
             });
             pan.SetDitransitiveCommand("use", (tool) => {
                 if (tool == "eggs")
@@ -409,9 +410,9 @@ public class AlgiersWorld
 
         //ANTECHAMBRE
         Room antechambre = world.AddRoom("antechambre");
-        antechambre.description = "The room is empty. Since Maman went to the home, you moved everything to your BEDROOM. Everything is easier that way. The door to the landing is on your LEFT.";
+        antechambre.description = "The room is empty. Since Maman went to the home, you moved everything to your BEDROOM. Everything is easier that way. The door to the LANDING is on your left.";
         antechambre.AddExit("bedroom", "chambre");
-        antechambre.AddExit("left", "landing");
+        antechambre.AddExit("landing", "landing");
 
         //LANDING
         Room landing = world.AddRoom("landing");
@@ -584,6 +585,7 @@ public class AlgiersWorld
             marie.SetDitransitiveCommand("give", (gift) => {
                 if (gift == "necklace")
                 {
+                    player.RemoveFromInventory("necklace");
                     string response = "You hand Marie the necklace. She seems happy with it. She smiles at you and laughs in such a way that you kiss her.";
                     if (marie.conditions["swimming"])
                     {
@@ -604,7 +606,7 @@ public class AlgiersWorld
 
         //RESTAURANT
         Room restaurant = world.AddRoom("restaurant");
-        restaurant.description = "The door back to the STREET creaks when you open it. The restaurant is quiet. CELESTE stands behind the register. The chrome finish on the BAR catches the sunlight.";
+        restaurant.description = "The door back to the STREET creaks when you open it. The restaurant is quiet. CELESTE stands behind the register. The chrome finish on the COUNTER catches the sunlight.";
         restaurant.AddExit("street", "street");
 
             //CELESTE
@@ -630,16 +632,16 @@ public class AlgiersWorld
                 });
                 eggs.SetTransitiveCommand("take", () => {
                     player.AddToInventory("eggs", celeste);
-                    return "You decide to take two eggs. You wonder if you ought to have taken three";
+                    return "You decide to take two eggs. You wonder if you ought to have taken three.";
                 });
 
             //BAR
-            Container bar = restaurant.AddObject<Container>("bar");
+            Container bar = restaurant.AddObject<Container>("counter");
             bar.SetTransitiveCommand("what", () => {
-                string response = "It hurts to look at the bar; you can feel the sunlight reflecting off of it.";
+                string response = "It hurts to look at the counter; you can feel the sunlight reflecting off of it.";
                 if (bar.GameObjects.ContainsKey("necklace"))
                 {
-                    response = response + " Somone left a NECKLACE draping off the edge.";
+                    response = response + " Someone left a NECKLACE draping off the edge.";
                 }
                 return response;
             });

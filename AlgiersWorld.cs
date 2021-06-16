@@ -116,6 +116,31 @@ public class AlgiersWorld
             }
         });
 
+        //EXAMINE
+        world.AddTransitiveCommand("examine", CommandType.Transitive, "Examine what?");
+        world.SetTransitiveCommand("examine", (focus) => {
+            if (!player.CanAccessObject(focus))
+            {
+                return "There is no " + focus + " to examine here.";
+            }
+            else
+            {
+                GameObject focusObj = player.GetObject(focus);
+                if (focusObj.ResponsesT.ContainsKey("what"))
+                {
+                    return focusObj.ResponsesT["what"]();
+                }
+                else if (focusObj.ResponsesT.ContainsKey("who"))
+                {
+                    return focusObj.ResponsesT["who"]();
+                }
+                else
+                {
+                    return "You can't examine the " + focus + ".";
+                }
+            }
+        });
+
         //TAKE
         world.AddTransitiveCommand("take", CommandType.Transitive, "Take what?", new string[]{"pick"}, new string[]{"up"});
         world.SetTransitiveCommand("take", (obj) => {
@@ -405,7 +430,7 @@ public class AlgiersWorld
                 return "Hey, pal. Come outside. I want to talk to you.";
             });
             emmanuel_bal.SetTransitiveCommand("who", () => {
-                return "Emmanuel works as a dispatcher. He doesn't always understand what's going, but he's good fun.";
+                return "Emmanuel works as a dispatcher. He doesn't always understand what's going on, but he's good fun.";
             });
 
         //ANTECHAMBRE
@@ -531,7 +556,7 @@ public class AlgiersWorld
                 }
             });
             emmanuel_st.SetTransitiveCommand("who", () => {
-                return "Emmanuel works as a dispatcher. He doesn't always understand what's going, but he's good fun.";
+                return "Emmanuel works as a dispatcher. He doesn't always understand what's going on, but he's good fun.";
             });
         
         //BEACH

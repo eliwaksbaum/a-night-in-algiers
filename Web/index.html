@@ -17,13 +17,18 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div> -->
-    <script src="_framework/blazor.webassembly.js"></script>
     <script>
-        window.scrollTerminal = () => {
+        function scrollTerminal() {
             var output = document.getElementById("output-div");
             output.scrollTop = output.scrollHeight;
-        };
+        }
+
+        function focusInput() {
+            var input = document.getElementById("input-box");
+            input.focus();
+        }
     </script>
+    <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
 </html>

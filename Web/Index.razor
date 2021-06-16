@@ -5,7 +5,7 @@
     <div id="output-div">
         <pre id="output-box">@output</pre>
     </div>
-    <input id="input-box" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
+    <input id="input-box" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
 </div>
 
 @using Intf
@@ -34,6 +34,7 @@
                 {
                     response = Parser.Parse(input, world);
                 }
+
                 else if (world.state == "quit")
                 {
                     if (input == "y" || input == "yes")

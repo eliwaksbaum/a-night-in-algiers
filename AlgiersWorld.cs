@@ -10,8 +10,8 @@ public class AlgiersWorld
             "inventory, inv, i - display your inventory",
             "look, l (around) - look at your surroundings",
             "go, travel (to) - move to a new room",
-            "examine, what - examine an object in the room or in your inventory",
-            "who (is) - examine a person in the room",
+            "what, examine - examine an object in the room or in your inventory",
+            "who (is), examine - examine a person in the room",
             "take, pick up - take an item and place it in your inventory",
             "talk (to) - talk to another character in the room",
             "use - use an item in your inventory",
@@ -75,8 +75,8 @@ public class AlgiersWorld
         });
         
         //WHAT
-        world.AddTransitiveCommand("examine", CommandType.Transitive, "Examine what?", new string[]{"what"});
-        world.SetTransitiveCommand("examine", (obj) => {
+        world.AddTransitiveCommand("what", CommandType.Transitive, "What is what?");
+        world.SetTransitiveCommand("what", (obj) => {
             if (!player.CanAccessObject(obj))
             {
                 return "There is no " + obj + " to examine here.";

@@ -80,7 +80,10 @@ namespace Intf
 
         public void AddWaypoint(string newPoint)
         {
-            waypoints.Add(newPoint);
+            if (!waypoints.Contains(newPoint))
+            {
+                waypoints.Add(newPoint);
+            }
         }
 
         public bool InInventory(string target)

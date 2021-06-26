@@ -75,6 +75,13 @@ namespace Intf
         public Room current_room;
         Dictionary<string, GameObject> inventory = new Dictionary<string, GameObject>();
         public Dictionary<string, GameObject> Inventory {get{return inventory;}}
+        List<string> waypoints = new List<string>();
+        public List<string> Waypoints {get{return waypoints;}}
+
+        public void AddWaypoint(string newPoint)
+        {
+            waypoints.Add(newPoint);
+        }
 
         public bool InInventory(string target)
         {

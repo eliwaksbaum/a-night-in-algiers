@@ -424,10 +424,13 @@ public class AlgiersWorld
             //EMMANUEL
             GameObject emmanuel_bal = balcony.AddObject<GameObject>("emmanuel");
             emmanuel_bal.SetTransitiveCommand("look", () => {
-                return "Below you, you see EMMANUEL waving up at you.";
+                string ending = (player.Waypoints.Contains("recvdEmQuest"))? "waiting." : "waving up at you.";
+                return "Below you, you see EMMANUEL " + ending;
             });
             emmanuel_bal.SetTransitiveCommand("talk", () => {
-                return "Hey, pal. Come outside. I want to talk to you.";
+                string talk = (player.Waypoints.Contains("recvdEmQuest"))?
+                    "'Did you find that movie ticket?'" : "Hey, pal. Come outside. I want to talk to you.";
+                return talk;
             });
             emmanuel_bal.SetTransitiveCommand("who", () => {
                 return "Emmanuel works as a dispatcher. He doesn't always understand what's going on, but he's good fun.";
@@ -524,12 +527,14 @@ public class AlgiersWorld
             Person emmanuel_st = street.AddObject<Person>("emmanuel");
             emmanuel_st.conditions.Add("firstTalk", false);
             emmanuel_st.SetTransitiveCommand("look", () => {
-                return "EMMANUEL stands outside the BUILDING. He waves at you.";
+                string ending = (player.Waypoints.Contains("recvdEmQuest"))? "" : " He waves at you.";
+                return "EMMANUEL stands outside the BUILDING." + ending;
             });
             emmanuel_st.SetTransitiveCommand("talk", () => {
                 if (!emmanuel_st.conditions["firstTalk"] && emmanuel_st.Gifts.Count == 0)
                 {
                     emmanuel_st.conditions["firstTalk"] = true;
+                    player.AddWaypoint("recvdEmQuest");
                     return "'Hey, pal. Do you remember the name of that movie you took Marie to the other day? I'd like to take this girl to see it tonight.'" + Environment.NewLine + "You can't remember what the movie was called. You tell Emmanuel you'll just give him the ticket.";
                 }
                 else if (emmanuel_st.Gifts.Count == 0)
@@ -544,6 +549,10 @@ public class AlgiersWorld
             emmanuel_st.SetDitransitiveCommand("give", (gift) => {
                 if (gift == "ticket")
                 {
+                    if (!emmanuel_st.conditions["firstTalk"])
+                    {
+                        player.AddWaypoint("recvdEmQuest");
+                    }
                     player.RemoveFromInventory("ticket");
                     emmanuel_st.AddGift("ticket");
                     balcony.RemoveObject("emmanuel");

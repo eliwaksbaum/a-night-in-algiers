@@ -130,7 +130,7 @@ namespace Intf
         }
     }
 
-    //ORIGN
+    //ORIGIN
     public interface IOrigin
     {
         void RemoveObject(string target);
@@ -148,6 +148,8 @@ namespace Intf
         string id;
         public string ID {get{return id;}}
         public string description;
+        public Action OnEnter = () => {};
+        public Action OnExit = () => {};
         Dictionary<string, string> exits = new Dictionary<string, string>();
         public Dictionary<string, string> Exits {get{return exits;}}
         Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();

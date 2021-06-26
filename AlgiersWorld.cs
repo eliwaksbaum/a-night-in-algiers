@@ -196,8 +196,10 @@ public class AlgiersWorld
             }
             else
             {
+                player.current_room.OnExit();
                 string newRoomID = player.current_room.Exits[newRoom];
                 player.current_room = world.Rooms[newRoomID];
+                player.current_room.OnEnter();
                 return world.Responses["look"]();
             }
         });

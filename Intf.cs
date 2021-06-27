@@ -77,12 +77,27 @@ namespace Intf
         public Dictionary<string, GameObject> Inventory {get{return inventory;}}
         List<string> waypoints = new List<string>();
         public List<string> Waypoints {get{return waypoints;}}
+        Dictionary<string, int> counters = new Dictionary<string, int>();
+        public Dictionary<string, int> Counters {get{return counters;}}
 
         public void AddWaypoint(string newPoint)
         {
             if (!waypoints.Contains(newPoint))
             {
                 waypoints.Add(newPoint);
+            }
+        }
+
+        public void AddCounter(string counter)
+        {
+            counters.Add(counter, 0);
+        }
+
+        public void IncrementCounter(string counter)
+        {
+            if (counters.ContainsKey(counter))
+            {
+                counters[counter] += 1;
             }
         }
 

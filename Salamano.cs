@@ -3,20 +3,17 @@ using System;
 
 public class Salamano
 {
-    public static Action Roam(int instance, Room room)
+    public static void Roam(int instance, Room room)
     {
+        GameObject salamano = room.AddObject<GameObject>("salamano");
+        salamano.conditions.Add("firstThreeTalk", false);
+
         Func<string> Look = () => {return looks[instance];};
+        Func<string> Talk = (instance == 3)? LastTalk(salamano) : DefaultTalk;
 
-        return () => {
-            GameObject salamano = room.AddObject<GameObject>("salamano");
-            salamano.conditions.Add("firstThreeTalk", false);
-
-            Func<string> Talk = (instance == 3)? LastTalk(salamano) : DefaultTalk;
-
-            salamano.SetTransitiveCommand("talk", Talk);
-            salamano.SetTransitiveCommand("look", Look);
-            salamano.SetTransitiveCommand("who", Who);
-        };
+        salamano.SetTransitiveCommand("talk", Talk);
+        salamano.SetTransitiveCommand("look", Look);
+        salamano.SetTransitiveCommand("who", Who);
     }
 
     static string Who()

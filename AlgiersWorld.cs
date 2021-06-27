@@ -465,9 +465,9 @@ public class AlgiersWorld
             int salCount = player.Counters["salamanoPasses"];
             if (salCount == 0 || salCount == 3)
             {
-                Salamano.Roam(salCount, landing)();
+                Salamano.Roam(salCount, landing);
             }
-            else if (salCount == 1)
+            if (salCount == 1 || salCount == 3)
             {
                 player.IncrementCounter("salamanoPasses");
             }
@@ -502,7 +502,7 @@ public class AlgiersWorld
             int salCount = player.Counters["salamanoPasses"];
             if (salCount == 1 || salCount == 2)
             {
-                Salamano.Roam(salCount, street)();
+                Salamano.Roam(salCount, street);
             }
         };
         street.OnExit = () => {

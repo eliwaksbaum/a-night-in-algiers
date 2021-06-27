@@ -24,8 +24,14 @@ public class AlgiersWorld
         world.state = "play";
         world.start = instructions + Environment.NewLine + "You awake in your bedroom.";
         Player player = world.player;
+        player.AddCounter("salamanoPasses");
 
         //COMMANDS
+
+        world.AddIntransitiveCommand("peek", CommandType.Intransitive);
+        world.SetIntransitiveCommand("peek", () => {
+            return player.Counters["salamanoPasses"].ToString();
+        });
 
         //LOOK
         world.AddIntransitiveCommand("look", CommandType.Intransitive, new string[]{"l"}, preps: new string[] {"around"});
@@ -443,12 +449,35 @@ public class AlgiersWorld
         antechambre.description = "The room is empty. Since Maman went to the home, you moved everything to your BEDROOM. Everything is easier that way. The door to the LANDING is on your left.";
         antechambre.AddExit("bedroom", "chambre");
         antechambre.AddExit("landing", "landing");
+        antechambre.OnEnter = () => {
+            if (player.Counters["salamanoPasses"] == 2)
+            {
+                player.IncrementCounter("salamanoPasses");
+            }
+        };
 
         //LANDING
         Room landing = world.AddRoom("landing");
-        landing.description = "RAYMOND is leaning against the wall, smoking a cigarette. The door to your APARTMENT hangs ajar. The doors to the other apartments are all closed. A staircase leads OUTSIDE.";
+        landing.description = "The landing is not very large. The door to your APARTMENT hangs ajar. The doors to the other apartments are all closed. A staircase leads OUTSIDE.";
         landing.AddExit("apartment", "antechambre");
         landing.AddExit("outside", "street");
+        landing.OnEnter = () => {
+            int salCount = player.Counters["salamanoPasses"];
+            if (salCount == 0 || salCount == 3)
+            {
+                Salamano.Roam(salCount, landing)();
+            }
+            else if (salCount == 1)
+            {
+                player.IncrementCounter("salamanoPasses");
+            }
+        };
+        landing.OnExit = () => {
+            if (player.Counters["salamanoPasses"] < 3)
+            {
+                landing.RemoveObject("salamano");
+            }
+        };
 
             //KEY
             GameObject key = landing.AddObject<GameObject>("key");
@@ -463,8 +492,38 @@ public class AlgiersWorld
                 return "You pick the key up off the staircase.";
             });
 
+        //STREET
+        Room street = world.AddRoom("street");
+        street.description = "You stand on a busy street corner. RAYMOND leans against the side of your BUILDING, smoking a cigarette. Celeste's RESTAURANT is across the way, next to the streetcar stop for the line to the BEACH.";
+        street.AddExit("restaurant", "restaurant");
+        street.AddExit("beach", "beach");
+        street.AddExit("building", "landing");
+        street.OnEnter = () => {
+            int salCount = player.Counters["salamanoPasses"];
+            if (salCount == 1 || salCount == 2)
+            {
+                Salamano.Roam(salCount, street)();
+            }
+        };
+        street.OnExit = () => {
+            street.RemoveObject("salamano");
+        };
+
+            //KNIFE
+            GameObject knife = street.AddObject<GameObject>("knife");
+            knife.SetTransitiveCommand("look", () => {
+                return "The sun glints off of a small KNIFE lying discarded on the pavement.";
+            });
+            knife.SetTransitiveCommand("what", () => {
+                return "A short, rusted knife.";
+            });
+            knife.SetTransitiveCommand("take", () => {
+                player.AddToInventory("knife", street);
+                return "You squint from the glare as you pick the knife up off the street. You never know when a knife might be useful.";
+            });
+
             //RAYMOND
-            Person raymond = landing.AddObject<Person>("raymond");
+            Person raymond = street.AddObject<Person>("raymond");
             raymond.conditions.Add("firstTalk", false);
             raymond.SetTransitiveCommand("talk", () => {
                 if (raymond.Gifts.Count == 0 && !raymond.conditions["firstTalk"])
@@ -503,26 +562,6 @@ public class AlgiersWorld
             });
             raymond.SetTransitiveCommand("who", () => {
                 return "His name is Raymond Sintès. He's a little on the short side, with broad shoulders and a nose like a boxer's. He always dresses very sharp. The word around the neighborhood is that he lives off women.";
-            });
-
-        //STREET
-        Room street = world.AddRoom("street");
-        street.description = "You stand on a busy street corner. Celeste's RESTAURANT is across the way, next to the streetcar stop for the line to the BEACH.";
-        street.AddExit("restaurant", "restaurant");
-        street.AddExit("beach", "beach");
-        street.AddExit("building", "landing");
-
-            //KNIFE
-            GameObject knife = street.AddObject<GameObject>("knife");
-            knife.SetTransitiveCommand("look", () => {
-                return "The sun glints off of a small KNIFE lying discarded on the pavement.";
-            });
-            knife.SetTransitiveCommand("what", () => {
-                return "A short, rusted knife.";
-            });
-            knife.SetTransitiveCommand("take", () => {
-                player.AddToInventory("knife", street);
-                return "You squint from the glare as you pick the knife up off the street. You never know when a knife might be useful.";
             });
 
             //EMMANUEL
@@ -574,6 +613,12 @@ public class AlgiersWorld
         Room beach = world.AddRoom("beach");
         beach.description = "The sun beats down on the white sand. The stone stairs lead back up to where you can catch a streetcar back to your BLOCK.";
         beach.AddExit("block", "street");
+        beach.OnEnter = () => {
+            if (player.Counters["salamanoPasses"] < 3)
+            {
+                player.IncrementCounter("salamanoPasses");
+            }
+        };
 
             //SEASHELL
             GameObject seashell = beach.AddObject<GameObject>("seashell");
@@ -644,6 +689,12 @@ public class AlgiersWorld
         Room restaurant = world.AddRoom("restaurant");
         restaurant.description = "The door back to the STREET creaks when you open it. The restaurant is quiet. CELESTE stands behind the register. The chrome finish on the COUNTER catches the sunlight.";
         restaurant.AddExit("street", "street");
+        restaurant.OnEnter = () => {
+            if (player.Counters["salamanoPasses"] < 3)
+            {
+                player.IncrementCounter("salamanoPasses");
+            }
+        };
 
             //CELESTE
             Container celeste = restaurant.AddObject<Container>("celeste");

@@ -8,12 +8,12 @@
     <base href="/res/blazor/algiers/" />
     <style>
         #output-div{
-        position: relative;
-        overflow-y: scroll;
+            position: relative;
+            overflow-y: scroll;
 
-        margin: 0;
-        height: 90%;
-        background-color: black;
+            margin: 0;
+            height: 90%;
+            background-color: black;
         }
         #output-box {
             display: block;
@@ -28,19 +28,23 @@
             position:absolute;
             top: 0;
         }
-        #input-box {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14pt;
-
+        #input-div {
             width: 100%;
-            height: 2em;
-            line-height: 2em;
             margin: 0;
-            padding-left: 0.5em;
             border: none;
             border-top: 2px solid white;
             background-color: black;
             color: inherit;
+        }
+        #input-box {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14pt;
+            height: 2em;
+            line-height: 2em;
+            padding-left: 0.5em;
+            border: none;
+            background-color: inherit;
+            color: inherit
         }
         #input-box:focus-visible {
             outline:none;

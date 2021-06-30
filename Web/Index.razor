@@ -5,7 +5,9 @@
     <div id="output-div">
         <pre id="output-box">@output</pre>
     </div>
-    <input id="input-box" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
+    <div id="input-div">
+        <input id="input-box" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
+    </div>
 </div>
 
 @using Intf

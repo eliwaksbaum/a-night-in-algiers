@@ -6,7 +6,7 @@
         <pre id="output-box">@output</pre>
     </div>
     <div id="input-div">
-        <input id="input-box" type="text" autocomplete="off" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeypress="OnKeyPress"/>	
+        <input id="input-box" type="text" autocomplete="off" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown"/>	
     </div>
 </div>
 
@@ -56,16 +56,8 @@
                 }
 
                 output += response + Parser.Clear;
-                input = "";
             }
-        }
-    }
-
-    private async void OnKeyPress(KeyboardEventArgs args)
-    {
-        if (args.Code == "Enter")
-        {
-            await JS.InvokeVoidAsync("scrollTerminal");
+            input = "";
         }
     }
 
@@ -74,6 +66,10 @@
         if (firstRender)
         {
             await JS.InvokeVoidAsync("focusInput");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("scrollTerminal");
         }
     }
 }

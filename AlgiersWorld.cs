@@ -28,11 +28,6 @@ public class AlgiersWorld
 
         //COMMANDS
 
-        world.AddIntransitiveCommand("peek", CommandType.Intransitive);
-        world.SetIntransitiveCommand("peek", () => {
-            return player.Counters["salamanoPasses"].ToString();
-        });
-
         //LOOK
         world.AddIntransitiveCommand("look", CommandType.Intransitive, new string[]{"l"}, preps: new string[] {"around"});
         world.SetIntransitiveCommand("look", () => {
@@ -308,7 +303,7 @@ public class AlgiersWorld
                     wardrobe.conditions["locked"] = false;
                     return "You turn the key in the lock, but the wardrobe stays shut. You think you need to pry it open somehow.";
                 }
-                else if(wardrobe.conditions["stuck"] && tool == "knife")
+                else if(!wardrobe.conditions["locked"] && wardrobe.conditions["stuck"] && tool == "knife")
                 {
                     wardrobe.conditions["stuck"] = false;
                     return "You slip the knife between the doors and the wardrobe pops open.";
@@ -442,6 +437,9 @@ public class AlgiersWorld
             });
             emmanuel_bal.SetTransitiveCommand("who", () => {
                 return "Emmanuel works as a dispatcher. He doesn't always understand what's going on, but he's good fun.";
+            });
+            emmanuel_bal.SetDitransitiveCommand("give", (gift) => {
+                return "You can't reach Emmanuel from here. Better go meet him outside.";
             });
 
         //ANTECHAMBRE

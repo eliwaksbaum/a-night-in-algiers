@@ -8,8 +8,8 @@ You need to download and install the dotnet SDK. I built to two platforms: Conso
 - place Intf.cs in the home directory
 - using the Intf namespace, create a public class with a public `SetWorld`method that creates all the objects and rooms in your game and returns a `World` object
 - The `Main` method in Program.cs is where the game logic goes. Use  `Console.WriteLine()` `Console.ReadLine()` and `Parser.Parse()`, to collect input, generate responses, and update the display. See the Console folder for an example.
-- To publish, run `dotnet  publish -c Release`
-- The build will appear in bin/Release/net**/publish
+- To publish, run `dotnet  publish -c Release -r [win/osx/linux]-64 --self-contained`
+- The build will appear in bin/Release/netcoreapp**/[win/osx/linux]-64/publish
 ### Web
 - run `dotnet new blazorwasm` in an empty directory
 - You can clear all the files out of Pages and Shared except for Index.razor and MainLayout.razor

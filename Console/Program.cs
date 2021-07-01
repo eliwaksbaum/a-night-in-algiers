@@ -39,6 +39,7 @@ namespace Algiers
                 Console.WriteLine("");
                 Console.WriteLine(response);
             }
+            Console.ReadLine();
         }
     }
 }

@@ -302,7 +302,7 @@ namespace Intf
     //PARSER
     ////////
 
-    public enum CommandType {Intransitive, Transitive, Ditransitive, Multi}
+    public enum CommandType {Intransitive, Transitive, Ditransitive}
     public class Command
     {
         public Command(string _id, CommandType _type, string _missingTargetError = null,
@@ -328,36 +328,6 @@ namespace Intf
         public string [] Aliases {get{return aliases;}}
         string missingTargetError;
         public string MissingTargetError {get{return missingTargetError;}}
-    }
-    public struct IntransitiveCmd
-    {
-        public IntransitiveCmd(Command _command, Func<string> _response)
-        {
-            command = _command;
-            response = _response;
-        }
-        public Command command;
-        public Func<string> response;
-    }
-    public struct TransitiveCmd
-    {
-        public TransitiveCmd(Command _command, Func<string, string> _response)
-        {
-            command = _command;
-            response = _response;
-        }
-        public Command command;
-        public Func<string, string> response;
-    }
-    public struct DitransitiveCmd
-    {
-        public DitransitiveCmd(Command _command, Func<string, string, string> _response)
-        {
-            command = _command;
-            response = _response;
-        }
-        public Command command;
-        public Func<string, string, string> response;
     }
 
     public class Parser

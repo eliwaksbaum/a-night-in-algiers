@@ -1,5 +1,10 @@
 # Algiers
-A bare-bones text adventure tool written in C#, used to write a creative thesis on Albert Camus' *The Stranger* in text adventure form. Intf.cs holds the namespace with all the classes and methods required to build a game. AlgiersWorld.cs is an example of how to use those classes and methods to build a simple text-adventure game, in this case a lesson in absurdism set in the world of *The Stranger*. If you wanted to make your own game this way (though really you should be using a real engine like Inform7 or TADS), read below for build instructions.
+A bare-bones text adventure tool written in C#, used to write a creative thesis on Albert Camus' *The Stranger* in text adventure form. Intf.cs holds the namespace with all the classes and methods required to build a game. AlgiersWorld.cs is an example of how to use those classes and methods to build a simple text-adventure game, in this case a lesson in absurdism set in the world of *The Stranger*. 
+
+
+[Play](https://eli.waksbaum.com/projects/algiers) | [Read](https://eli.waksbaum.com/projects/algiers/notes)
+
+If you wanted to make your own game this way (though really you should be using a real engine like Inform7 or TADS), read below for build instructions.
 
 ## Build
 You need to download and install the dotnet SDK. I built to two platforms: Console and Web. Console is a stand-alone app that runs in the terminal on Windows or Linux. Web is a [Blazor](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor) app that compiles to Web Assembly (essentially the same output you get from building a Unity project for WebGL, if you're familiar). This is dotnet, though, so you could probably figure out how to publish it in other ways, too.

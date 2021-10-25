@@ -1,7 +1,7 @@
 ﻿using System;
-using Intf;
+using Algiers;
 
-namespace Algiers
+namespace ANightInAlgiers
 {
     class Program
     {

@@ -6,7 +6,8 @@
         <pre id="output-box">@output</pre>
     </div>
     <div id="input-div">
-        <input id="input-box" type="text" autocomplete="off" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown"/>	
+        <span>> </span>
+        <input id="input-box" type="text" autocomplete="off" spellcheck="false" @bind="input" @bind:event="oninput" @onkeydown="OnKeyDown" @onkeydown:preventDefault="supress"/>	
     </div>
 </div>
 
@@ -14,29 +15,33 @@
 @code {
     private string input;
     private string output = "Press Enter to Start.";
-    private bool playing = false;
+    private bool started = false;
     private World world;
+
+    private bool supress = false;
+    private List<string> history = [];
+    private int h_i = -1;
+    private int h_l = 0;
+    const int h_max = 20;
 
     private void OnKeyDown(KeyboardEventArgs args)
     {
+        supress = false;
         if (args.Code == "Enter")
         {
-            if (!playing)
+            if (!started)
             {
+                started = true;
                 world = AlgiersWorld.SetWorld();
                 output = world.start + Parser.Clear;
-                playing = true;
             }
             else if (!world.done)
             {
                 string response = "";
-                output += ">" + input + Parser.Clear;
-
                 if (world.state == "play")
                 {
                     response = Parser.Parse(input, world);
                 }
-
                 else if (world.state == "quit")
                 {
                     if (input == "y" || input == "yes")
@@ -54,10 +59,44 @@
                         response = "Are you sure you want to give up? (yes/no)";
                     }
                 }
-
+                if (!string.IsNullOrEmpty(input))
+                {
+                    history = [input, ..history.Take(h_max - 1)];
+                    h_l = h_l == h_max ? h_l : h_l + 1;
+                }
                 output += response + Parser.Clear;
+                output = string.Join(Parser.Clear, output.Split(Parser.Clear).TakeLast(500));
+                input = "";
             }
-            input = "";
+        }
+        else if (started && !world.done) {
+            if (args.Code == "ArrowUp")
+            {
+                supress = true;
+                if (h_i < h_l - 1)
+                {
+                    input = history[++h_i];
+                }
+             Console.WriteLine((h_i, h_l));
+            }
+            else if (args.Code == "ArrowDown")
+            {
+                supress = true;
+                if (h_i > 0)
+                {
+                    input = history[--h_i];
+                }
+                else if (h_i == 0)
+                {
+                    h_i--;
+                    input = "";
+                }
+                Console.WriteLine((h_i, h_l));
+            }
+            else if (args.Code.StartsWith("Key"))
+            {
+                h_i = -1;
+            }
         }
     }
 

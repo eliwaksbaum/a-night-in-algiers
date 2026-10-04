@@ -17,12 +17,11 @@ public class AlgiersWorld
             "use - use an item in your inventory",
             "use .. on / with - use an item in your inventory on something in the room",
             "give .. to - give an item in your inventory to another character in the room",
-            "quit - give up and exit the game",
-            ""
+            "quit - give up and exit the game"
         );
         World world = new World();
         world.state = "play";
-        world.start = instructions + Environment.NewLine + "You awake in your bedroom.";
+        world.start = instructions + Parser.Clear + "You awake in your bedroom.";
         Player player = world.player;
         player.AddCounter("salamanoPasses");
 

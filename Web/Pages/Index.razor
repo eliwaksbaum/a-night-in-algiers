@@ -64,6 +64,7 @@
                     history = [input, ..history.Take(h_max - 1)];
                     h_l = h_l == h_max ? h_l : h_l + 1;
                 }
+                output += "> " + input + Parser.Clear;
                 output += response + Parser.Clear;
                 output = string.Join(Parser.Clear, output.Split(Parser.Clear).TakeLast(500));
                 input = "";
